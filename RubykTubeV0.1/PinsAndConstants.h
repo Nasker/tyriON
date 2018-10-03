@@ -1,14 +1,16 @@
 //Constants Definition of Pin Numbers and other constants
-
-#define ROT1_RIGHT_PIN    GPIO_NUM_25
-#define ROT1_LEFT_PIN     GPIO_NUM_26
-#define ROT2_RIGHT_PIN    GPIO_NUM_27
-#define ROT2_LEFT_PIN     GPIO_NUM_9
-#define ROT3_RIGHT_PIN    GPIO_NUM_10
-#define ROT3_LEFT_PIN     GPIO_NUM_13
-#define PIXEL_PIN         GPIO_NUM_5
+                                          //BITMASKs for PINs
+#define ROT1_RIGHT_PIN    GPIO_NUM_25    // 0x2000000         
+#define ROT1_LEFT_PIN     GPIO_NUM_26    // 0x4000000
+#define ROT2_RIGHT_PIN    GPIO_NUM_27    // 0x3D0900
+#define ROT2_LEFT_PIN     GPIO_NUM_9     
+#define ROT3_RIGHT_PIN    GPIO_NUM_10    
+#define ROT3_LEFT_PIN     GPIO_NUM_13    // 0x2000
+#define GPIO_MASK ( 0x2000000 | 0x4000000 | 0x3D0900 | 0x2000 )
+#define PIXEL_PIN         GPIO_NUM_5 
 #define WAKEUP_TOUCH_PIN  T0
 #define VCC_LEVEL_PIN     GPIO_NUM_15
+
 
 #define PIXEL_COUNT       6
 #define colorSaturation   128

@@ -29,22 +29,13 @@ void callback() {
 }
 
 void setup() {
+  strip.Begin();
+  stripShowColor(white);
   Serial.begin(115200);
   deepSleepCalls();
   strip.Begin();//psyPixel.beginStrip();//
   initWifiandOSC();
 }
-
-void deepSleepCalls() {
-  print_wakeup_reason();
-  touchAttachInterrupt(WAKEUP_TOUCH_PIN, callback, TOUCH_TRESHOLD);
-  esp_sleep_enable_touchpad_wakeup();   //Configure Touchpad as wakeup source
-  esp_sleep_enable_ext0_wakeup(GPIO_NUM_25, 0);
-  esp_sleep_enable_ext0_wakeup(GPIO_NUM_26, 0);
-  esp_sleep_enable_ext0_wakeup(GPIO_NUM_27, 0);
-  esp_sleep_enable_ext0_wakeup(GPIO_NUM_13, 0);
-}
-
 
 void loop() {
   rotaryClick1.callbackOnRotation(actOnRotCallback);
@@ -80,9 +71,11 @@ void initWifiandOSC() {
   osc.addCallback("/RubykTube", &actOnReceiveOSCCallback);
 }
 
-void actOnReceiveOSCCallback(OSCMessage& m) {
-  Serial.print(m.getOSCAddress());
-  Serial.println(m.getArgAsString(0));
+void deepSleepCalls() {
+  print_wakeup_reason();
+  touchAttachInterrupt(WAKEUP_TOUCH_PIN, callback, TOUCH_TRESHOLD);
+  esp_sleep_enable_touchpad_wakeup();   //Configure Touchpad as wakeup source
+  esp_sleep_enable_ext1_wakeup(GPIO_MASK, ESP_EXT1_WAKEUP_ALL_LOW);
 }
 
 void stripShowColor(RgbColor color) {
@@ -103,6 +96,11 @@ void print_wakeup_reason() {
     case 5  : Serial.println("Wakeup caused by ULP program"); break;
     default : Serial.println("Wakeup was not caused by deep sleep"); break;
   }
+}
+
+void actOnReceiveOSCCallback(OSCMessage& m) {
+  Serial.print(m.getOSCAddress());
+  Serial.println(m.getArgAsString(0));
 }
 
 void actOnBatteryCallback(String callbackString, float vccLevel) {
@@ -145,7 +143,7 @@ void actOnCounterTick(String callbackString, int ticksLeft) {
   stripShowColor(black);//psyPixel.blackenStrip();//
   if (callbackString == "TICK") {
     Serial.print(callbackString);
-    Serial.print("lefting #");
+    Serial.print("s left: #");
     Serial.println(ticksLeft);
   }
   if (callbackString == "IDDLE EXPIRED") {
@@ -177,10 +175,14 @@ void onWiFiEvent(WiFiEvent_t event) {
       }
     case SYSTEM_EVENT_STA_DISCONNECTED: {
         Serial.println("STA Lost Connection");
+        Serial.println("Trying to connect back again!");
+        initWifiandOSC();
         break;
       }
     case SYSTEM_EVENT_STA_STOP: {
         Serial.println("STA Stopped");
+        Serial.println("Trying to connect back again!");
+        initWifiandOSC();
         break;
       }
     default: {
