@@ -32,7 +32,7 @@ void setup() {
   strip.Begin();
   stripShowColor(white);
   Serial.begin(115200);
-  deepSleepCalls();
+  afterDeepSleepAPICalls();
   strip.Begin();//psyPixel.beginStrip();//
   initWifiandOSC();
 }
@@ -41,7 +41,6 @@ void loop() {
   rotaryClick1.callbackOnRotation(actOnRotCallback);
   rotaryClick2.callbackOnRotation(actOnRotCallback);
   rotaryClick3.callbackOnRotation(actOnRotCallback);
-
   iddleCounter.callbackIddleCounter(actOnCounterTick);
   batteryControl.monitorBatteryCallbacks(actOnBatteryCallback);
 }
@@ -71,11 +70,19 @@ void initWifiandOSC() {
   osc.addCallback("/RubykTube", &actOnReceiveOSCCallback);
 }
 
-void deepSleepCalls() {
+void afterDeepSleepAPICalls() {
+  print_wakeup_reason();
+}
+
+void beforeDeepSleepAPICalls() {
   print_wakeup_reason();
   touchAttachInterrupt(WAKEUP_TOUCH_PIN, callback, TOUCH_TRESHOLD);
   esp_sleep_enable_touchpad_wakeup();   //Configure Touchpad as wakeup source
   esp_sleep_enable_ext1_wakeup(GPIO_MASK, ESP_EXT1_WAKEUP_ALL_LOW);
+  Serial.println("Going to sleep now");
+  delay(1000);
+  esp_deep_sleep_start();//esp_light_sleep_start();
+
 }
 
 void stripShowColor(RgbColor color) {
@@ -152,9 +159,7 @@ void actOnCounterTick(String callbackString, int ticksLeft) {
     msgSleep.setOSCAddress("/Status");
     msgSleep.addArgString("GOING TO SLEEP!");
     osc.send(msgSleep);
-    Serial.println("Going to sleep now");
-    delay(1000);
-    esp_deep_sleep_start();
+    beforeDeepSleepAPICalls();
   }
 }
 

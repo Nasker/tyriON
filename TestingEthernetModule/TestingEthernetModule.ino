@@ -3,67 +3,70 @@
 #include <SPI.h>
 #include <OSCMessage.h>
 #include <OSCBundle.h>
-#include <OSCBoards.h>
+#include <OSCBoards.h>        //includes necessaris per el modul d'ethernet i OSC
 
-#define ETHERNET_RESET_PIN 9
+#define ETHERNET_RESET_PIN 9    //Pins de reset i chip select (els altres per defecte)
 #define ETHERNET_CS_PIN 10
 
-EthernetUDP Udp;
-IPAddress ip(192, 168, 1, 123);
-IPAddress outIp(192, 168, 1, 131);
-const unsigned int outPort = 12000;
+EthernetUDP Udp;                //objecte per a connexió udp
+IPAddress ip(172, 16, 17, 172);   //ip de la teensy i port on escoltem
 const unsigned int inPort  = 12001;
-byte mac[] = { 0x04, 0xE9, 0xE5, 0x03, 0x94, 0x5E }; 
+IPAddress outIp(172, 16, 17, 173);    //ip destí i port on enviarem
+const unsigned int outPort = 12000;
+byte mac[] = { 0x04, 0xE9, 0xE5, 0x03, 0x94, 0x5E }; //mac, patillera
+
+int coordinateX = 0;    //"jugarem a rebotar les coordenades que ens envia la aplicació al destí
+int coordinateY = 0;
 
 void setup() {
-  Serial.begin(115200);
-  EthernetResetInitSeq();
-  Ethernet.begin(mac, ip);
-  Udp.begin(inPort);
+  Serial.begin(115200);     //veloctitat de comunicació amb el port serie
+  EthernetResetInitSeq();   //funció (definidad més abaix) de secuencia necesaria per inicialitzar modul ethernet!!
+  Ethernet.begin(mac, ip);  //arranquem el modul d'ethernet
+  Udp.begin(inPort);        //arranquem el port on escoltarem en Udp
 }
-
 
 void loop() {
-  sendOSCMessage();
-  OSCMsgReceive();
-  delay(1000);
-}
-
-void sendOSCMessage() {
-  OSCMessage msg("/FUCK");
-  msg.add(analogRead(A0));
-  msg.add("FUCK YOU!");
-  Udp.beginPacket(outIp, outPort);
-  msg.send(Udp);
-  Udp.endPacket();
-  msg.empty();
-  Serial.println("MESSAGE SEND");
+  OSCMsgReceive();    //al loop només esperem a rebre missatges OSC
 }
 
 void OSCMsgReceive() {
-  OSCBundle bundleIN;
-  int size;
-  if ( (size = Udp.parsePacket()) > 0) {
-    Serial.print("Message Received with size: ");
-    Serial.println(size);
-    while (size--)
-      bundleIN.fill(Udp.read());
-      
-    if (!bundleIN.hasError()) bundleIN.route("/input", inputfunction);
-    else Serial.println("Message No GOOd!");
+  OSCBundle bundleIN;       //paquet generic de missatges OSC, pot contenir whatever
+  int size = Udp.parsePacket(); //mirem si hi ha dades als paquets, si rebem algo
+  if (size > 0) {   //si rebem algo...
+    //Serial.print("Message Received with size: ");
+    //Serial.println(size);
+    while (size--) {
+      bundleIN.fill(Udp.read()); //plenem el bundle amb el que llegim al port Udp
+    }
+    bundleIN.route("/received", receivedMessageFunction);  //"Rutejem el rebut a l'etiqueta i la funció que cidrem mes abaix.
   }
 }
 
-void EthernetResetInitSeq() {
+void receivedMessageFunction(OSCMessage &msg, int addrOffset) {
+  coordinateX = msg.getInt(0);    //desempaquetem els Integers que ens venen
+  coordinateY = msg.getInt(1);
+  Serial.print("-X: ");             //els imprimim pel port serie
+  Serial.print(coordinateX);
+  Serial.print("\t-Y: ");
+  Serial.println(coordinateY);
+  sendOSCMessage();         //els enviarem (son variables globals, per aixo no hi ha arguments)
+}
+
+void sendOSCMessage() {
+  OSCMessage msg("/response");      //creem un missatge OSC amb l'etiqueta /response
+  msg.add(coordinateX);             //Hi afegim les coordinades
+  msg.add(coordinateY);         
+  Udp.beginPacket(outIp, outPort);      //Comenvem un paquet de transmissio Udp
+  msg.send(Udp);                  //l'enviem
+  Udp.endPacket();              //tanquem el paquet
+  msg.empty();                   //buidem el missatge
+  //Serial.println("MESSAGE SEND");
+}
+
+void EthernetResetInitSeq() {         //secuencia d'inici necesaria per al modul ethernet
   pinMode(ETHERNET_RESET_PIN, OUTPUT);
   digitalWrite(ETHERNET_RESET_PIN, LOW);    // begin reset the WIZ820io
   pinMode(ETHERNET_CS_PIN, OUTPUT);
   digitalWrite(ETHERNET_CS_PIN, HIGH);  // de-select WIZ820io
   digitalWrite(ETHERNET_RESET_PIN, HIGH);
-}
-
-void inputfunction(OSCMessage &msg, int addrOffset){
-  int value = msg.getInt(0);
-  Serial.print("Value = : ");
-  Serial.println(value);
 }
