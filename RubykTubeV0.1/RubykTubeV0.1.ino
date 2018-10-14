@@ -12,6 +12,7 @@ RgbColor blue(0, 0, colorSaturation);
 RgbColor white(colorSaturation, colorSaturation, colorSaturation);
 RgbColor black(0);
 
+
 WiFiUDP udp;
 ArduinoOSCWiFi osc;
 
@@ -29,11 +30,9 @@ void callback() {
 }
 
 void setup() {
-  strip.Begin();
-  stripShowColor(white);
   Serial.begin(115200);
+  initialBatteryLevelDisplay();
   afterDeepSleepAPICalls();
-  strip.Begin();//psyPixel.beginStrip();//
   initWifiandOSC();
 }
 
@@ -43,6 +42,19 @@ void loop() {
   rotaryClick3.callbackOnRotation(actOnRotCallback);
   iddleCounter.callbackIddleCounter(actOnCounterTick);
   batteryControl.monitorBatteryCallbacks(actOnBatteryCallback);
+}
+
+void initialBatteryLevelDisplay() {
+  float volts = batteryControl.getVoltageLevel();
+  float voltageHue = constrain(map(round( volts * 100), 300, 400, 0, 120), 0, 120) / 360.0f;
+  Serial.print("Measured volts are: ");
+  Serial.print(volts);
+  Serial.print("\t Battery hue is: ");
+  Serial.println(voltageHue);
+  HslColor batteryLevelColor(voltageHue, 1.0, 0.5);
+  strip.Begin();//psyPixel.beginStrip();//
+  stripShowColor(batteryLevelColor);
+  delay(2000);
 }
 
 void initWifiandOSC() {
@@ -76,9 +88,10 @@ void afterDeepSleepAPICalls() {
 
 void beforeDeepSleepAPICalls() {
   print_wakeup_reason();
-  touchAttachInterrupt(WAKEUP_TOUCH_PIN, callback, TOUCH_TRESHOLD);
-  esp_sleep_enable_touchpad_wakeup();   //Configure Touchpad as wakeup source
-  esp_sleep_enable_ext1_wakeup(GPIO_MASK, ESP_EXT1_WAKEUP_ALL_LOW);
+  //touchAttachInterrupt(WAKEUP_TOUCH_PIN, callback, TOUCH_TRESHOLD);
+  //esp_sleep_enable_touchpad_wakeup();   //Configure Touchpad as wakeup source
+  //esp_sleep_enable_ext1_wakeup(GPIO_MASK, ESP_EXT1_WAKEUP_ALL_LOW);
+  esp_sleep_enable_ext0_wakeup(GPIO_NUM_25, 0);
   Serial.println("Going to sleep now");
   delay(1000);
   esp_deep_sleep_start();//esp_light_sleep_start();
@@ -116,7 +129,7 @@ void actOnBatteryCallback(String callbackString, float vccLevel) {
   Serial.print(vccLevel);
   Serial.println("V");
 
-  Serial.println("SENDING ROTARIES OSC MESSAGE!");
+  Serial.println("SENDING BATTERY LEVEL OSC MESSAGE!");
   OSCMessage msg;
   msg.beginMessage(host, send_port);
   msg.setOSCAddress("/status");

@@ -9,12 +9,10 @@
 #define GPIO_MASK ( 0x2000000 | 0x4000000 | 0x3D0900 | 0x2000 )
 #define PIXEL_PIN         GPIO_NUM_5 
 #define WAKEUP_TOUCH_PIN  T0
-#define VCC_LEVEL_PIN     GPIO_NUM_15
-
+#define VCC_LEVEL_PIN     GPIO_NUM_36
 
 #define PIXEL_COUNT       6
 #define colorSaturation   128
-
 
 #define FIREBEETLE_ADC_LEVELS 4096
 #define TOUCH_TRESHOLD 40

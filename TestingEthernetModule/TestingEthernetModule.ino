@@ -9,10 +9,10 @@
 #define ETHERNET_CS_PIN 10
 
 EthernetUDP Udp;                //objecte per a connexió udp
-IPAddress ip(172, 16, 17, 172);   //ip de la teensy i port on escoltem
-const unsigned int inPort  = 12001;
-IPAddress outIp(172, 16, 17, 173);    //ip destí i port on enviarem
-const unsigned int outPort = 12000;
+IPAddress ip(192, 168, 1, 31);  //172, 16, 17, 172 //ip de la teensy i port on escoltem
+const unsigned int inPort  = 3312;
+IPAddress outIp(192, 168, 1, 131); //ip destí i port on enviarem
+const unsigned int outPort = 3311;
 byte mac[] = { 0x04, 0xE9, 0xE5, 0x03, 0x94, 0x5E }; //mac, patillera
 
 int coordinateX = 0;    //"jugarem a rebotar les coordenades que ens envia la aplicació al destí
@@ -38,8 +38,18 @@ void OSCMsgReceive() {
     while (size--) {
       bundleIN.fill(Udp.read()); //plenem el bundle amb el que llegim al port Udp
     }
-    bundleIN.route("/received", receivedMessageFunction);  //"Rutejem el rebut a l'etiqueta i la funció que cidrem mes abaix.
+    bundleIN.route("/received", receivedMessageFunction);  //"Rutejem el rebut a l'etiqueta i la funció que cridem mes abaix.
+    bundleIN.route("/fuck",fuckFunction);
   }
+}
+
+void fuckFunction(OSCMessage &msg, int addrOffset) {
+  OSCMessage answ("/fuck");      //creem un missatge OSC amb l'etiqueta /response
+  answ.add("FUCK YOU");
+  Udp.beginPacket(outIp, outPort);      //Comenvem un paquet de transmissio Udp
+  answ.send(Udp);                  //l'enviem
+  Udp.endPacket();              //tanquem el paquet
+  answ.empty();  
 }
 
 void receivedMessageFunction(OSCMessage &msg, int addrOffset) {
@@ -55,7 +65,7 @@ void receivedMessageFunction(OSCMessage &msg, int addrOffset) {
 void sendOSCMessage() {
   OSCMessage msg("/response");      //creem un missatge OSC amb l'etiqueta /response
   msg.add(coordinateX);             //Hi afegim les coordinades
-  msg.add(coordinateY);         
+  msg.add(coordinateY);
   Udp.beginPacket(outIp, outPort);      //Comenvem un paquet de transmissio Udp
   msg.send(Udp);                  //l'enviem
   Udp.endPacket();              //tanquem el paquet
