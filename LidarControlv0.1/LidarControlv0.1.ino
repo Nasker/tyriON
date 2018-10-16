@@ -31,6 +31,7 @@ void setup() {
   Ethernet.begin(mac, selfIp);  //arranquem el modul d'ethernet
   Udp.begin(inPort);        //arranquem el port on escoltarem en Udp
   lidar.begin(4, true);
+  lidar.configure(4);
 }
 
 void loop() {
@@ -55,4 +56,3 @@ void actOnRangeCallback(int id, String callbackString, int currentStep, int curr
   Udp.endPacket();              //tanquem el paquet
   msg.empty();
 }
-
