@@ -12,7 +12,6 @@ RgbColor blue(0, 0, colorSaturation);
 RgbColor white(colorSaturation, colorSaturation, colorSaturation);
 RgbColor black(0);
 
-
 WiFiUDP udp;
 ArduinoOSCWiFi osc;
 
@@ -24,6 +23,10 @@ RTPRotary rotaryClick3(3, ROT3_RIGHT_PIN, ROT3_LEFT_PIN);
 RTPPeriodicBang iddleCounter(PERIOD_MILLIS, IDDLE_SECONDS);
 RTPBatteryControl batteryControl(VCC_LEVEL_PIN, FIREBEETLE_ADC_LEVELS);
 //RTPPsyPixel psyPixel(PIXEL_COUNT, PIXEL_PIN);
+
+unsigned long int blinkPastMillis;
+int blinkLength = 100;
+bool ledsOn = false;
 
 void callback() {
   Serial.println("TOUCHÉ!");
@@ -42,10 +45,18 @@ void loop() {
   rotaryClick3.callbackOnRotation(actOnRotCallback);
   iddleCounter.callbackIddleCounter(actOnCounterTick);
   batteryControl.monitorBatteryCallbacks(actOnBatteryCallback);
+  blinkLEDs();
+}
+
+void blinkLEDs() {
+  if (blinkLength + blinkPastMillis < millis() && ledsOn) {
+    stripShowColor(black);//psyPixel.blackenStrip();//
+    ledsOn = false;
+  }
 }
 
 void initialBatteryLevelDisplay() {
-  float volts = batteryControl.getVoltageLevel();
+  float volts = batteryControl.getVoltageLevelFast();
   float voltageHue = constrain(map(round( volts * 100), 300, 400, 0, 120), 0, 120) / 360.0f;
   Serial.print("Measured volts are: ");
   Serial.print(volts);
@@ -54,7 +65,7 @@ void initialBatteryLevelDisplay() {
   HslColor batteryLevelColor(voltageHue, 1.0, 0.5);
   strip.Begin();//psyPixel.beginStrip();//
   stripShowColor(batteryLevelColor);
-  delay(2000);
+  delay(1000);
 }
 
 void initWifiandOSC() {
@@ -75,7 +86,7 @@ void initWifiandOSC() {
   else
     stripShowColor(blue);//psyPixel.blueStrip(); //
 
-  delay(2000);
+  delay(1000);
   stripShowColor(black); //psyPixel.blackenStrip(); //
 
   osc.begin(udp, recv_port);
@@ -141,6 +152,8 @@ void actOnBatteryCallback(String callbackString, float vccLevel) {
 void actOnRotCallback(int ID, String callbackString, int newPosition) {
   stripShowColor(black);//psyPixel.blackenStrip();//
   stripShowColor(red);//psyPixel.psyColorStrip();//
+  blinkPastMillis = millis();
+  ledsOn = true;
   Serial.print("Rotary with ID #");
   Serial.print(ID);
   Serial.print(" ");
@@ -160,7 +173,7 @@ void actOnRotCallback(int ID, String callbackString, int newPosition) {
 }
 
 void actOnCounterTick(String callbackString, int ticksLeft) {
-  stripShowColor(black);//psyPixel.blackenStrip();//
+  //stripShowColor(black);//psyPixel.blackenStrip();//
   if (callbackString == "TICK") {
     Serial.print(callbackString);
     Serial.print("s left: #");
