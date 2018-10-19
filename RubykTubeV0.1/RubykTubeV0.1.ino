@@ -25,7 +25,6 @@ RTPBatteryControl batteryControl(VCC_LEVEL_PIN, FIREBEETLE_ADC_LEVELS);
 //RTPPsyPixel psyPixel(PIXEL_COUNT, PIXEL_PIN);
 
 unsigned long int blinkPastMillis;
-int blinkLength = 100;
 bool ledsOn = false;
 
 void callback() {
@@ -49,7 +48,7 @@ void loop() {
 }
 
 void blinkLEDs() {
-  if (blinkLength + blinkPastMillis < millis() && ledsOn) {
+  if (blinkPastMillis + BLINK_LENGTH < millis() && ledsOn) {
     stripShowColor(black);//psyPixel.blackenStrip();//
     ledsOn = false;
   }
@@ -65,7 +64,7 @@ void initialBatteryLevelDisplay() {
   HslColor batteryLevelColor(voltageHue, 1.0, 0.5);
   strip.Begin();//psyPixel.beginStrip();//
   stripShowColor(batteryLevelColor);
-  delay(1000);
+  delay(500);
 }
 
 void initWifiandOSC() {
@@ -86,7 +85,7 @@ void initWifiandOSC() {
   else
     stripShowColor(blue);//psyPixel.blueStrip(); //
 
-  delay(1000);
+  delay(500);
   stripShowColor(black); //psyPixel.blackenStrip(); //
 
   osc.begin(udp, recv_port);

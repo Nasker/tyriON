@@ -19,6 +19,7 @@
 
 #define PERIOD_MILLIS 1000
 #define IDDLE_SECONDS 60
+#define BLINK_LENGTH 50
 
 
 //Now define WIFI constants 
