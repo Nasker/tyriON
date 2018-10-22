@@ -55,13 +55,7 @@ void blinkLEDs() {
 }
 
 void initialBatteryLevelDisplay() {
-  float volts = batteryControl.getVoltageLevelFast();
-  float voltageHue = constrain(map(round( volts * 100), 300, 400, 0, 120), 0, 120) / 360.0f;
-  Serial.print("Measured volts are: ");
-  Serial.print(volts);
-  Serial.print("\t Battery hue is: ");
-  Serial.println(voltageHue);
-  HslColor batteryLevelColor(voltageHue, 1.0, 0.5);
+  HslColor batteryLevelColor(batteryControl.getHueLevel() / 360.0f, 1.0, 0.5);
   strip.Begin();//psyPixel.beginStrip();//
   stripShowColor(batteryLevelColor);
   delay(500);
