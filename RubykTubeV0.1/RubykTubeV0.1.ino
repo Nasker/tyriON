@@ -15,9 +15,11 @@ RgbColor black(0);
 WiFiUDP udp;
 ArduinoOSCWiFi osc;
 
-RTPRotary rotaryClick1(1, ROT1_RIGHT_PIN, ROT1_LEFT_PIN);
-RTPRotary rotaryClick2(2, ROT2_RIGHT_PIN, ROT2_LEFT_PIN);
-RTPRotary rotaryClick3(3, ROT3_RIGHT_PIN, ROT3_LEFT_PIN);
+RTPRotary rotariesArray[N_ROTARIES] = {
+  RTPRotary(0, ROT1_RIGHT_PIN, ROT1_LEFT_PIN),
+  RTPRotary(1, ROT2_RIGHT_PIN, ROT2_LEFT_PIN),
+  RTPRotary(2, ROT3_RIGHT_PIN, ROT3_LEFT_PIN)
+};
 //arguments => (ID, rightRotaryPin, leftRotaryPin)
 
 RTPPeriodicBang iddleCounter(PERIOD_MILLIS, IDDLE_SECONDS);
@@ -39,12 +41,11 @@ void setup() {
 }
 
 void loop() {
-  rotaryClick1.callbackOnRotation(actOnRotCallback);
-  rotaryClick2.callbackOnRotation(actOnRotCallback);
-  rotaryClick3.callbackOnRotation(actOnRotCallback);
+  for (int i = 0; i < N_ROTARIES; i++)
+    rotariesArray[i].callbackOnRotation(actOnRotCallback);
+  blinkLEDs();
   iddleCounter.callbackIddleCounter(actOnCounterTick);
   batteryControl.monitorBatteryCallbacks(actOnBatteryCallback);
-  blinkLEDs();
 }
 
 void blinkLEDs() {
@@ -142,7 +143,7 @@ void actOnBatteryCallback(String callbackString, float vccLevel) {
   osc.send(msg);
 }
 
-void actOnRotCallback(int ID, String callbackString, int newPosition) {
+void actOnRotCallback(int ID, String callbackString,int rotationDirection, int newPosition) {
   stripShowColor(black);//psyPixel.blackenStrip();//
   stripShowColor(red);//psyPixel.psyColorStrip();//
   blinkPastMillis = millis();
@@ -151,16 +152,19 @@ void actOnRotCallback(int ID, String callbackString, int newPosition) {
   Serial.print(ID);
   Serial.print(" ");
   Serial.print(callbackString);
+  Serial.print("\t-Direction: ");
+  Serial.print(rotationDirection);
   Serial.print("\t-Position: ");
   Serial.println(newPosition);
 
   Serial.println("SENDING ROTARIES OSC MESSAGE!");
   OSCMessage msg;
   msg.beginMessage(host, send_port);
-  msg.setOSCAddress("/Rotary");
-  msg.addArgInt32(ID);
-  msg.addArgString(callbackString);
-  msg.addArgInt32(newPosition);
+  msg.setOSCAddress("/state" + ID);
+  //msg.addArgInt32(ID);
+  //msg.addArgString(callbackString);
+  msg.addArgInt32(rotationDirection);
+  //msg.addArgInt32(newPosition);
   osc.send(msg);
   iddleCounter.resetIddleCounter();
 }

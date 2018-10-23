@@ -13,7 +13,7 @@
 
 #include <NeoPixelBus.h>
 
-const uint16_t PixelCount = 7; // this example assumes 4 pixels, making it smaller will cause a failure
+const uint16_t PixelCount = 6; // this example assumes 4 pixels, making it smaller will cause a failure
 const uint8_t PixelPin = GPIO_NUM_5;  // make sure to set this to the correct pin, ignored for Esp8266
 
 #define colorSaturation 128

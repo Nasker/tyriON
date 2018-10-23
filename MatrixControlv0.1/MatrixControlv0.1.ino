@@ -26,7 +26,7 @@ int mcpRead0Last;
 int mcpRead1Last;
 
 void setup() {
-  Serial.begin(115200);     //veloctitat de comunicació amb el port serie
+  Serial.begin(115200);     //velocitat de comunicació amb el port serie
   EthernetResetInitSeq();   //funció (definidad més abaix) de secuencia necesaria per inicialitzar modul ethernet!!
   Ethernet.begin(mac, selfIp);  //arranquem el modul d'ethernet
   Udp.begin(inPort);        //arranquem el port on escoltarem en Udp
@@ -63,5 +63,7 @@ void actOnGPIOReadChanges() {
     msg.send(Udp);                  //l'enviem
     Udp.endPacket();              //tanquem el paquet
     msg.empty();
+    mcpRead0Last = mcpRead0.readGPIOAB();
+    mcpRead1Last = mcpRead1.readGPIOAB();
   }
 }

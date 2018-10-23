@@ -26,7 +26,7 @@ RTPSmooth smoothie;
 RTPSmartRange lidarRange(0, 1, 200, 0, 200);
 
 void setup() {
-  Serial.begin(115200);     //veloctitat de comunicació amb el port serie
+  Serial.begin(115200);     //velocitat de comunicació amb el port serie
   EthernetResetInitSeq();   //funció (definidad més abaix) de secuencia necesaria per inicialitzar modul ethernet!!
   Ethernet.begin(mac, selfIp);  //arranquem el modul d'ethernet
   Udp.begin(inPort);        //arranquem el port on escoltarem en Udp

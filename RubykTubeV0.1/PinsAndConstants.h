@@ -1,5 +1,6 @@
 //Constants Definition of Pin Numbers and other constants
-                                          //BITMASKs for PINs
+
+#define N_ROTARIES        3              //BITMASKs for PINs
 #define ROT1_RIGHT_PIN    GPIO_NUM_25    // 0x2000000         
 #define ROT1_LEFT_PIN     GPIO_NUM_26    // 0x4000000
 #define ROT2_RIGHT_PIN    GPIO_NUM_27    // 0x3D0900
