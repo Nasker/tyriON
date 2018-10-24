@@ -38,11 +38,13 @@ void setup() {
   initialBatteryLevelDisplay();
   afterDeepSleepAPICalls();
   initWifiandOSC();
+  for (int i = 0; i < N_ROTARIES; i++)
+    rotariesArray[i].callbackOnRotation(initRotaries);
 }
 
 void loop() {
   for (int i = 0; i < N_ROTARIES; i++)
-    rotariesArray[i].callbackOnRotation(actOnRotCallback);
+    rotariesArray[i].callbackOnRotation(actOnRotaryCallback);
   blinkLEDs();
   iddleCounter.callbackIddleCounter(actOnCounterTick);
   batteryControl.monitorBatteryCallbacks(actOnBatteryCallback);
@@ -53,6 +55,10 @@ void blinkLEDs() {
     stripShowColor(black);//psyPixel.blackenStrip();//
     ledsOn = false;
   }
+}
+
+void initRotaries(int ID, String callbackString,int rotationDirection, int newPosition) {
+  Serial.println("Rotaries init!");
 }
 
 void initialBatteryLevelDisplay() {
@@ -143,7 +149,7 @@ void actOnBatteryCallback(String callbackString, float vccLevel) {
   osc.send(msg);
 }
 
-void actOnRotCallback(int ID, String callbackString,int rotationDirection, int newPosition) {
+void actOnRotaryCallback(int ID, String callbackString,int rotationDirection, int newPosition) {
   stripShowColor(black);//psyPixel.blackenStrip();//
   stripShowColor(red);//psyPixel.psyColorStrip();//
   blinkPastMillis = millis();
