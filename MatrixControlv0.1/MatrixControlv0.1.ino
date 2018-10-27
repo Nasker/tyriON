@@ -11,11 +11,11 @@
 #include "PinsAndConstants.h"
 
 EthernetUDP Udp;                //objecte per a connexió udp
-IPAddress selfIp(192, 168, 1, 31);  //172, 16, 17, 172 //ip de la teensy i port on escoltem
-const unsigned int inPort  = 3312;
-IPAddress outIp(192, 168, 1, 131); //ip destí i port on enviarem
-const unsigned int outPort = 3311;
-byte mac[] = { 0x04, 0xE9, 0xE5, 0x03, 0x94, 0x5E }; //mac, patillera
+IPAddress selfIp(192, 168, 1, 34);  //172, 16, 17, 172 //ip de la teensy i port on escoltem
+const unsigned int inPort  = 3342;
+IPAddress outIp(192, 168, 1, 130); //ip destí i port on enviarem  192, 168, 1, 20
+const unsigned int outPort = 3341;
+byte mac[] = { 0x04, 0xE9, 0xE5, 0x03, 0x94, 0x4E }; //mac, patillera
 
 Adafruit_MCP23017 mcpRead0;
 Adafruit_MCP23017 mcpRead1;
@@ -47,7 +47,7 @@ void loop() {
   mcpWrite0.writeGPIOAB(mcpRead0.readGPIOAB());
   mcpWrite1.writeGPIOAB(mcpRead1.readGPIOAB());
   actOnGPIOReadChanges();
-  delay(500);
+  //delay(50);
 }
 
 void actOnGPIOReadChanges() {

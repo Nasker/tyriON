@@ -10,11 +10,11 @@
 #include "PinsAndConstants.h"
 
 EthernetUDP Udp;                //objecte per a connexió udp
-IPAddress selfIp(172, 16, 17, 172);  //192, 168, 1, 31 //ip de la teensy i port on escoltem
+IPAddress selfIp(192, 168, 1, 31);  //192, 168, 1, 31 //ip de la teensy i port on escoltem
 const unsigned int inPort  = 3312;
-IPAddress outIp(172, 16, 17, 173); //192, 168, 1, 131//ip destí i port on enviarem
+IPAddress outIp(192, 168, 1, 130); //192, 168, 1, 10//ip destí i port on enviarem
 const unsigned int outPort = 3311;
-byte mac[] = { 0x04, 0xE9, 0xE5, 0x03, 0x94, 0x5E }; //mac, patillera
+byte mac[] = { 0x04, 0xE9, 0xE5, 0x03, 0x94, 0x1E }; //mac, patillera
 
 RTPRelay relaysArray[N_RELAYS] = {
   RTPRelay(RELAY_PIN_1ST), RTPRelay(RELAY_PIN_2ND),

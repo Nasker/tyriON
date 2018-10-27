@@ -4,11 +4,11 @@
 #define ROT1_RIGHT_PIN    GPIO_NUM_25    // 0x2000000         
 #define ROT1_LEFT_PIN     GPIO_NUM_26    // 0x4000000
 #define ROT2_RIGHT_PIN    GPIO_NUM_27    // 0x3D0900
-#define ROT2_LEFT_PIN     GPIO_NUM_9     
-#define ROT3_RIGHT_PIN    GPIO_NUM_10    
+#define ROT2_LEFT_PIN     GPIO_NUM_9
+#define ROT3_RIGHT_PIN    GPIO_NUM_10
 #define ROT3_LEFT_PIN     GPIO_NUM_13    // 0x2000
 #define GPIO_MASK ( 0x2000000 | 0x4000000 | 0x3D0900 | 0x2000 )
-#define PIXEL_PIN         GPIO_NUM_5 
+#define PIXEL_PIN         GPIO_NUM_5
 #define WAKEUP_TOUCH_PIN  T0
 #define VCC_LEVEL_PIN     A0
 
@@ -23,12 +23,14 @@
 #define BLINK_LENGTH 50
 
 
-//Now define WIFI constants 
+//Now define WIFI constants
 const char* ssid = "NaisDelClot";
 const char* pwd = "xmp13051985";
-const IPAddress ip(192, 168, 1, 201);
+//const char* ssid = "E-TRON 2.4G"; //Antiloop
+//const char* password = "etron2017"; //Antiloop@MOB
+const IPAddress ip(192, 168, 1, 38);
 const IPAddress gateway(192, 168, 1, 1);
 const IPAddress subnet(255, 255, 255, 0);
-const char* host = "192.168.1.131";
-const int recv_port = 10000;
-const int send_port = 12000;
+const char* host = "192.168.1.130";  //192.168.1.10
+const int recv_port = 8889;
+const int send_port = 8888;

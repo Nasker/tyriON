@@ -11,11 +11,11 @@
 #include "PinsAndConstants.h"
 
 EthernetUDP Udp;                //objecte per a connexió udp
-IPAddress selfIp(192, 168, 1, 31);  //172, 16, 17, 172 //ip de la teensy i port on escoltem
-const unsigned int inPort  = 3312;
-IPAddress outIp(192, 168, 1, 131); //ip destí i port on enviarem
-const unsigned int outPort = 3311;
-byte mac[] = { 0x04, 0xE9, 0xE5, 0x03, 0x94, 0x5E }; //mac, patillera
+IPAddress selfIp(192, 168, 1, 32);  //172, 16, 17, 172 //ip de la teensy i port on escoltem
+const unsigned int inPort  = 3322;
+IPAddress outIp(192, 168, 1, 130); //ip destí i port on enviarem //192, 168, 1, 10
+const unsigned int outPort = 3321;
+byte mac[] = { 0x04, 0xE9, 0xE5, 0x03, 0x94, 0x2relayIpE }; //mac, patillera
 
 RTPButton inputsArray[N_INPUTS] = {
   RTPButton(DR_STEP_PIN_1ST, NORMAL), RTPButton(DR_STEP_PIN_2ND, NORMAL),
@@ -57,6 +57,14 @@ void actOnOpenRelay(OSCMessage &msg, int addrOffset) {
   int relayIndex = msg.getInt(0);    //desempaquetem els Integers que ens venen
   Serial.print("Opening relay #");
   Serial.println(relayIndex + 1);
+  if (relayIndex == 1) {
+    relaysArray[relayIndex].setState(true);
+    for (int = 0; i < 10; i++) {
+      relaysArray[relayIndex].switchState();
+      delay(50);
+    }
+    relaysArray[relayIndex].setState(false);
+  }
   relaysArray[relayIndex].setState(true);
 }
 

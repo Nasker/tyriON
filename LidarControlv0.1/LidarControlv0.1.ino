@@ -15,10 +15,10 @@
 #include "PinsAndConstants.h"
 
 EthernetUDP Udp;                //objecte per a connexió udp
-IPAddress selfIp(192, 168, 1, 31);  //172, 16, 17, 172 //ip de la teensy i port on escoltem
-const unsigned int inPort  = 3312;
-IPAddress outIp(192, 168, 1, 131); //ip destí i port on enviarem
-const unsigned int outPort = 3311;
+IPAddress selfIp(192, 168, 1, 35);  //172, 16, 17, 172 //ip de la teensy i port on escoltem
+const unsigned int inPort  = 3352;
+IPAddress outIp(192, 168, 1, 130); //ip destí i port on enviarem  192, 168, 1, 20
+const unsigned int outPort = 3351;
 byte mac[] = { 0x04, 0xE9, 0xE5, 0x03, 0x94, 0x5E }; //mac, patillera
 
 LIDARLite lidar;

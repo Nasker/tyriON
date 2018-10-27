@@ -57,7 +57,7 @@ void blinkLEDs() {
   }
 }
 
-void initRotaries(int ID, String callbackString,int rotationDirection, int newPosition) {
+void initRotaries(int ID, String callbackString, int rotationDirection, int newPosition) {
   Serial.println("Rotaries init!");
 }
 
@@ -149,7 +149,7 @@ void actOnBatteryCallback(String callbackString, float vccLevel) {
   osc.send(msg);
 }
 
-void actOnRotaryCallback(int ID, String callbackString,int rotationDirection, int newPosition) {
+void actOnRotaryCallback(int ID, String callbackString, int rotationDirection, int newPosition) {
   stripShowColor(black);//psyPixel.blackenStrip();//
   stripShowColor(red);//psyPixel.psyColorStrip();//
   blinkPastMillis = millis();
@@ -166,9 +166,11 @@ void actOnRotaryCallback(int ID, String callbackString,int rotationDirection, in
   Serial.println("SENDING ROTARIES OSC MESSAGE!");
   OSCMessage msg;
   msg.beginMessage(host, send_port);
-  msg.setOSCAddress("/state" + ID);
-  //msg.addArgInt32(ID);
-  //msg.addArgString(callbackString);
+  switch (ID) {
+    case 0: msg.setOSCAddress("/state_1"); break;
+    case 1: msg.setOSCAddress("/state_2"); break;
+    case 2: msg.setOSCAddress("/state_3"); break;
+  }
   msg.addArgInt32(rotationDirection);
   //msg.addArgInt32(newPosition);
   osc.send(msg);
