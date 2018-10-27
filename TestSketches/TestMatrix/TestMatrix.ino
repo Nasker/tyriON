@@ -9,6 +9,12 @@ void loop() {
   mControl.testOutputMatrix();
   bool state[32];
   mControl.getMatrix(state);
+  mControl.setMatrix(state);
+  mControl.detectChangeCallback(actOnMatrixCallback);
+}
+
+void actOnMatrixCallback(String callbackString){
+  Serial.println(callbackString);
 }
 /*
   for (int i = 0; i < N_PINS_CHIP; i++) {
