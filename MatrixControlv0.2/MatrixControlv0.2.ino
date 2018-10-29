@@ -20,6 +20,7 @@ MatrixControl mControl;
 
 void setup() {
   Serial.begin(115200);     //velocitat de comunicació amb el port serie
+  Serial.println("Start sketch");
   EthernetResetInitSeq();   //funció (definidad més abaix) de secuencia necesaria per inicialitzar modul ethernet!!
   Ethernet.begin(mac, selfIp);  //arranquem el modul d'ethernet
   Udp.begin(inPort);        //arranquem el port on escoltarem en Udp
@@ -27,6 +28,7 @@ void setup() {
 
 void loop() {
   mControl.detectChangeCallback(actOnGPIOReadChanges);
+  mControl.testInputMatrix();
 }
 
 void actOnGPIOReadChanges(String callbackString) {

@@ -18,7 +18,7 @@ NetAddress rubykHost;
 
 
 void setup() {
-  size(1280, 800);
+  size(640, 480);
   oscP5_relays = new OscP5(this, 3311); 
   relaysHost = new NetAddress("192.168.1.31", 3312);
 

@@ -9,15 +9,15 @@
 
 class MatrixControl {
     const byte mcpReadsToMatrix[N_PINS_CHIP][N_INPUT_CHIPS] = {
-      {21, 13}, {15, 16}, {9, 7}, {22, 3}, {5, 28}, {15, 24}, {0, 19}, {4, 11},
-      {14, 17}, {30, 1}, {29, 10}, {12, 6}, {26, 2}, {25, 27}, {20, 23}, {8, 18}
+      {21, 21}, {15, 25}, {27, 8}, {22, 26}, {5, 12}, {10, 29}, {0, 14}, {4, 30},
+      {14, 1}, {30, 5}, {28, 9}, {12, 0}, {26, 15}, {25, 16}, {13, 4}, {31, 20}
     }; //Content not correct, but method is
 
     const byte matrixToMCPWrites[N_MATRIX_ELEMENTS][2] = {
-      {0, 6}, {1, 9}, {1, 12}, {1, 3}, {0, 7}, {0, 4}, {1, 11}, {1, 2},
-      {0, 15}, {0, 2}, {1, 10}, {1, 7}, {0, 11}, {1, 0}, {0, 8}, {0, 5},
-      {1, 1}, {1, 8}, {1, 15}, {1, 6}, {0, 14}, {0, 0}, {0, 3}, {1, 14},
-      {1, 5}, {0, 13}, {0, 12}, {1, 13}, {1, 4}, {0, 10}, {0, 9}, {0, 1}
+      {MCP_0, 6}, {MCP_1, 9}, {MCP_1, 12}, {MCP_1, 3}, {MCP_0, 7}, {MCP_0, 4}, {MCP_1, 11}, {MCP_1, 2},
+      {MCP_0, 15}, {MCP_0, 2}, {MCP_1, 10}, {MCP_1, 7}, {MCP_0, 11}, {MCP_1, 0}, {MCP_0, 8}, {MCP_0, 5},
+      {MCP_1, 1}, {MCP_1, 8}, {MCP_1, 15}, {MCP_1, 6}, {MCP_0, 14}, {MCP_0, 0}, {MCP_0, 3}, {MCP_1, 14},
+      {MCP_1, 5}, {MCP_0, 13}, {MCP_0, 12}, {MCP_1, 13}, {MCP_1, 4}, {MCP_0, 10}, {MCP_0, 9}, {MCP_0, 1}
     };
 
     Adafruit_MCP23017 mcpRead0;
@@ -36,80 +36,3 @@ class MatrixControl {
     void testOutputMatrix();
     void testInputMatrix();
 };
-
-MatrixControl::MatrixControl() {
-  mcpRead0.begin(mcpRead0Adress);
-  mcpRead1.begin(mcpRead1Adress);
-  mcpWrite0.begin(mcpWrite0Adress);
-  mcpWrite1.begin(mcpWrite1Adress);
-  for (int i = 0; i < N_PINS_CHIP; i++) {
-    mcpWrite0.pinMode(i, OUTPUT);
-    mcpWrite1.pinMode(i, OUTPUT);
-  }
-  for (int i = 0; i < N_PINS_CHIP; i++) {
-    mcpWrite0.digitalWrite(i, LOW);
-    mcpWrite1.digitalWrite(i, LOW);
-  }
-  mcpRead0Last = mcpRead0.readGPIOAB();
-  mcpRead1Last = mcpRead1.readGPIOAB();
-}
-
-void MatrixControl::getMatrix(bool (& matrixLedState) [N_MATRIX_ELEMENTS]) {
-  for (int i = 0; i < N_PINS_CHIP ; i++) {
-    int j = 0;
-    matrixLedState[mcpReadsToMatrix[i][j]] = mcpRead0.digitalRead(i);
-    j++;
-    matrixLedState[mcpReadsToMatrix[i][j]] = mcpRead1.digitalRead(i);
-  }
-  //for(int i = 0; i< 32; i++) ledState[i] = matrixLedState
-  //memcpy(ledState, matrixLedState, sizeof(matrixLedState) + 1);
-}
-
-
-void MatrixControl::setMatrix(bool (& matrixLedState) [N_MATRIX_ELEMENTS]) {
-  for (int i = 0; i < N_MATRIX_ELEMENTS; i++) {
-    if (matrixToMCPWrites[i][0] == 0) mcpWrite0.digitalWrite(i, matrixLedState[matrixToMCPWrites[i][1]]);
-    if (matrixToMCPWrites[i][0] == 1) mcpWrite1.digitalWrite(i, matrixLedState[matrixToMCPWrites[i][1]]);
-  }
-}
-
-void MatrixControl::detectChangeCallback(void (*f)(String)) {
-  if (mcpRead0.readGPIOAB() != mcpRead0Last || mcpRead1.readGPIOAB() != mcpRead1Last) {
-    (*f) ("CHANGED");
-    mcpRead0Last = mcpRead0.readGPIOAB();
-    mcpRead1Last = mcpRead1.readGPIOAB();
-  }
-}
-
-void MatrixControl::testOutputMatrix() {
-  for (int i = 0; i < N_PINS_CHIP; i++) {
-    Serial.print("A: ");
-    Serial.println(i);
-    mcpWrite0.digitalWrite(i, HIGH);
-    delay(5000);
-    mcpWrite0.digitalWrite(i, LOW);
-    Serial.print("B: ");
-    Serial.println(i);
-    mcpWrite1.digitalWrite(i, HIGH);
-    delay(5000);
-    mcpWrite1.digitalWrite(i, LOW);
-  }
-}
-
-void MatrixControl::testInputMatrix() {
-  Serial.print("1ST MCP ->");
-  for (int i = 0; i < N_PINS_CHIP; i++) {
-    Serial.print("  -");
-    Serial.print(i);
-    Serial.print(":");
-    mcpRead0.digitalRead(i);
-  }
-  Serial.print("\n2ND MCP ->");
-  for (int i = 0; i < N_PINS_CHIP; i++) {
-    Serial.print("  -");
-    Serial.print(i);
-    Serial.print(":");
-    mcpRead1.digitalRead(i);
-  }
-  Serial.println("\n\n");
-}

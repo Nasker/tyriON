@@ -1,6 +1,6 @@
 #include <RTPButton.h>
 
-#define INFRARED_PIN 2
+#define INFRARED_PIN 0
 
 RTPButton hall(INFRARED_PIN, NORMAL);
 
