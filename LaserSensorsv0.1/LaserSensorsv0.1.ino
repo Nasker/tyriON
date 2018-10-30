@@ -29,7 +29,7 @@ RTPRelay relaysArray[N_RELAYS] = {
   RTPRelay(RELAY_PIN_5TH)
 };
 
-RTPButton plugSensor(PLUG_SENSOR_PIN, NORMAL);
+RTPButton plugSensor(0, PLUG_SENSOR_PIN, NORMAL);
 
 void setup() {
   Serial.begin(115200);     //velocitat de comunicació amb el port serie
@@ -44,8 +44,11 @@ void setup() {
 
 void loop() {
   OSCMsgReceive();    //esperem a rebre missatges OSC
-  for (int i = 0; i < N_INPUTS; i++)
+  for (int i = 0; i < N_INPUTS; i++) {
     photoDiodesArray[i].readnShoot(actOnPhotoDiodeCallbacks);
+    //photoDiodesArray[i].printReading();
+  }
+  //Serial.println();
   plugSensor.callback(actOnPlugSensorCallback);
 }
 
@@ -101,7 +104,7 @@ void actOnPhotoDiodeCallbacks(int ID, String callbackString) {
   }
 }
 
-void actOnPlugSensorCallback (String callbackString) {
+void actOnPlugSensorCallback (int ID, String callbackString) {
   Serial.println(callbackString);
   if (callbackString == "DECLICK"  || callbackString == "CLICK") {
     relaysArray[4].setState(!plugSensor.pressed());

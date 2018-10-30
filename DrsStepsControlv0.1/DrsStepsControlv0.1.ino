@@ -18,8 +18,10 @@ const unsigned int outPort = 3321;
 byte mac[] = { 0x04, 0xE9, 0xE5, 0x03, 0x94, 0x2E }; //mac, patillera
 
 RTPButton inputsArray[N_INPUTS] = {
-  RTPButton(DR_STEP_PIN_1ST, NORMAL), RTPButton(DR_STEP_PIN_2ND, NORMAL),
-  RTPButton(DR_STEP_PIN_3RD, NORMAL), RTPButton(DR_STEP_PIN_4TH, NORMAL)
+  RTPButton(0, DR_STEP_PIN_1ST, NORMAL), RTPButton(1, DR_STEP_PIN_2ND, NORMAL),
+  RTPButton(2, DR_STEP_PIN_3RD, NORMAL), RTPButton(3, DR_STEP_PIN_4TH, NORMAL),
+  RTPButton(4, DR_STEP_PIN_5TH, NORMAL), RTPButton(5, DR_STEP_PIN_6TH, NORMAL),
+  RTPButton(6, DR_STEP_PIN_7TH, NORMAL), RTPButton(7, DR_STEP_PIN_8TH, NORMAL)
 };
 
 RTPRelay relaysArray[N_RELAYS] = {
@@ -36,7 +38,7 @@ void setup() {
 void loop() {
   OSCMsgReceive();    //esperem a rebre missatges OSC
   for (int i = 0; i < N_INPUTS; i++)
-    inputsArray[i].callback(actOnButtonCallbacks);
+    inputsArray[i].callback(actOnStepsCallbacks);
 }
 
 void OSCMsgReceive() {
@@ -75,8 +77,12 @@ void actOnCloseRelay(OSCMessage &msg, int addrOffset) {
   relaysArray[relayIndex].setState(false);
 }
 
-void actOnButtonCallbacks(String callbackString) {
+void actOnStepsCallbacks(int ID, String callbackString) {
   if (callbackString == "CLICK" || callbackString == "DECLICK") {
+    Serial.print("STEP #");
+    Serial.print(ID + 1);
+    Serial.print(" ");
+    Serial.println(callbackString);
     OSCMessage msg("/state");      //creem un missatge OSC amb l'etiqueta /response
     for (int i = 0; i < N_INPUTS; i++)
       msg.add(inputsArray[i].pressed());

@@ -18,17 +18,16 @@
 #define mcpWrite1Adress 3
 
 const byte mcpReadsToMatrix[N_PINS_CHIP][N_INPUT_CHIPS] = {
-  {21, 21}, {15, 25}, {27, 8}, {22, 26}, {5, 12}, {10, 29}, {0, 14}, {4, 30},
-  {14, 1}, {30, 5}, {28, 9}, {12, 0}, {26, 15}, {25, 16}, {13, 4}, {31, 20}
-}; //Content not correct, but method is
+  {18, 8}, {23, 21}, {27, 26}, {2, 25}, {6, 12}, {10, 29}, {17, 14}, {22, 30},
+  {7, 1}, {3, 5}, {19, 9}, {24, 15}, {28, 0}, {11, 16}, {13, 20}, {31, 4}
+}; //Should work
 
 const byte matrixToMCPWrites[N_MATRIX_ELEMENTS][2] = {
-  {MCP_0, 6}, {MCP_1, 9}, {MCP_1, 12}, {MCP_1, 3}, {MCP_0, 7}, {MCP_0, 4}, {MCP_1, 11}, {MCP_1, 2},
-  {MCP_0, 15}, {MCP_0, 2}, {MCP_1, 10}, {MCP_1, 7}, {MCP_0, 11}, {MCP_1, 0}, {MCP_0, 8}, {MCP_0, 5},
-  {MCP_1, 1}, {MCP_1, 8}, {MCP_1, 15}, {MCP_1, 6}, {MCP_0, 14}, {MCP_0, 0}, {MCP_0, 3}, {MCP_1, 14},
-  {MCP_1, 5}, {MCP_0, 13}, {MCP_0, 12}, {MCP_1, 13}, {MCP_1, 4}, {MCP_0, 10}, {MCP_0, 9}, {MCP_0, 1}
+  {MCP_0, 4}, {MCP_0, 6}, {MCP_1, 10}, {MCP_0, 10}, {MCP_0, 7}, {MCP_1, 9}, {MCP_1, 15}, {MCP_1, 4},
+  {MCP_0, 0}, {MCP_1, 12}, {MCP_1, 11}, {MCP_1, 2}, {MCP_0, 13}, {MCP_1, 7}, {MCP_0, 8}, {MCP_0, 3},
+  {MCP_0, 2}, {MCP_1, 8}, {MCP_1, 0}, {MCP_1, 1}, {MCP_0, 15}, {MCP_0, 1}, {MCP_0, 5}, {MCP_1, 14},
+  {MCP_1, 3}, {MCP_0, 14}, {MCP_0, 12}, {MCP_1, 5}, {MCP_1, 13}, {MCP_0, 11}, {MCP_0, 9}, {MCP_1, 6}
 };
-
 
 EthernetUDP Udp;                //objecte per a connexió udp
 IPAddress selfIp(192, 168, 1, 34);  //172, 16, 17, 172 //ip de la teensy i port on escoltem
@@ -47,19 +46,29 @@ Adafruit_MCP23017 mcpWrite1;
 int mcpRead0Last;
 int mcpRead1Last;
 
-void getMatrix(bool (& matrixLedState) [N_MATRIX_ELEMENTS]) {
+void getMatrix(bool (& matrixLedState) [N_MATRIX_ELEMENTS + 1]) {
   for (int i = 0; i < N_PINS_CHIP ; i++) {
     int j = 0;
     matrixLedState[mcpReadsToMatrix[i][j]] = mcpRead0.digitalRead(i);
     j++;
     matrixLedState[mcpReadsToMatrix[i][j]] = mcpRead1.digitalRead(i);
   }
-  //for(int i = 0; i< 32; i++) ledState[i] = matrixLedState
+  Serial.println();
+  //ledState[i] = matrixLedState
   //memcpy(ledState, matrixLedState, sizeof(matrixLedState) + 1);
 }
 
+void printMatrixLedState(bool (& matrixLedState) [N_MATRIX_ELEMENTS + 1]) {
+  for (int i = 0; i < N_MATRIX_ELEMENTS; i++) {
+    Serial.print(i);
+    Serial.print("-");
+    Serial.print(matrixLedState[i]);
+    Serial.print(" ");
+  }
+  Serial.println();
+}
 
-void setMatrix(bool (& matrixLedState) [N_MATRIX_ELEMENTS]) {
+void setMatrix(bool (& matrixLedState) [N_MATRIX_ELEMENTS + 1]) {
   for (int i = 0; i < N_MATRIX_ELEMENTS; i++) {
     switch (matrixToMCPWrites[i][0]) {
       case MCP_0: mcpWrite0.digitalWrite(i, matrixLedState[matrixToMCPWrites[i][1]]); break;
@@ -79,13 +88,18 @@ void setup() {
 
 void loop() {
   //Serial.println("LOOP!?");
-  //detectChangeCallback(actOnGPIOReadChanges); //detecta quan hi ha un canvi en el GPIO d'entrada i crida
+  bool matrixLedState[N_MATRIX_ELEMENTS + 1];
+  getMatrix(matrixLedState);
+  printMatrixLedState(matrixLedState);
+  // detectChangeCallback(actOnGPIOReadChanges); //detecta quan hi ha un canvi en el GPIO d'entrada i crida
   //a la funció que hi ha com a argument (callback)
 
   //les dos crides següents son per testejar entrades i sortides
-  testInputMatrix();  //printa l'estat dels inputs
-  //testOutputMatrix(); //loopeja al voltant de tots els outputs encenent-los i apagantlos secuencialment
-  //testOutputMatrix2();
+  //testInputMatrix();  //printa l'estat dels inputs
+  testOutputMatrix(); //loopeja al voltant de tots els outputs encenent-los i apagantlos secuencialment
+  // testOutputMatrix2();
+
+  //delay(1000);
 }
 
 void matrixInit() {  //Inicialitza els cmcps de la matriu
@@ -104,16 +118,16 @@ void matrixInit() {  //Inicialitza els cmcps de la matriu
   }
   mcpRead0Last = mcpRead0.readGPIOAB();
   mcpRead1Last = mcpRead1.readGPIOAB();
-  bool matrixInputState[N_MATRIX_ELEMENTS];
-  getMatrix(matrixInputState);
-  setMatrix(matrixInputState);
+  bool matrixInputState[N_MATRIX_ELEMENTS + 1];
+  //getMatrix(matrixInputState);
+  //setMatrix(matrixInputState);
   Serial.println("Finish Constructing Matrix");
 }
 
 void actOnGPIOReadChanges(String callbackString) {
   if (callbackString == "CHANGED") {
     Serial.println(callbackString);
-    bool matrixInputState[N_MATRIX_ELEMENTS];
+    bool matrixInputState[N_MATRIX_ELEMENTS + 1];
     getMatrix(matrixInputState);
     setMatrix(matrixInputState);
     OSCMessage msg("/state");      //creem un missatge OSC amb l'etiqueta /response
@@ -145,17 +159,18 @@ void testOutputMatrixSerial() {
     Serial.println(incomingByte, DEC);
   }
 }
+
 void testOutputMatrix() {
   for (int i = 0; i < N_PINS_CHIP; i++) {
     Serial.print("A: ");
     Serial.println(i);
     mcpWrite0.digitalWrite(i, HIGH);
-    delay(500);
+    delay(50);
     mcpWrite0.digitalWrite(i, LOW);
     Serial.print("B: ");
     Serial.println(i);
     mcpWrite1.digitalWrite(i, HIGH);
-    delay(500);
+    delay(50);
     mcpWrite1.digitalWrite(i, LOW);
   }
 }
@@ -165,12 +180,12 @@ void testOutputMatrix2() {
     mcpWrite0.digitalWrite(i, HIGH);
     mcpWrite1.digitalWrite(i, HIGH);
   }
-  delay(10000);
+  delay(100);
   for (int i = 0; i < N_PINS_CHIP; i++) {
     mcpWrite0.digitalWrite(i, LOW);
     mcpWrite1.digitalWrite(i, LOW);
   }
-  delay(1000);
+  delay(100);
 }
 
 void testInputMatrix() {

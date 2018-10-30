@@ -18,9 +18,9 @@ const unsigned int outPort = 3361;
 byte mac[] = { 0x04, 0xE9, 0xE5, 0x03, 0x94, 0x6E }; //mac, patillera
 
 RTPButton buttonsArray[N_INPUTS] = {
-  RTPButton(BUTTON_PIN_1ST, PULLUP), RTPButton(BUTTON_PIN_2ND, PULLUP),
-  RTPButton(BUTTON_PIN_3RD, PULLUP), RTPButton(BUTTON_PIN_4TH, PULLUP),
-  RTPButton(BUTTON_PIN_5TH, PULLUP)
+  RTPButton(0, BUTTON_PIN_1ST, PULLUP), RTPButton(1, BUTTON_PIN_2ND, PULLUP),
+  RTPButton(2, BUTTON_PIN_3RD, PULLUP), RTPButton(3, BUTTON_PIN_4TH, PULLUP),
+  RTPButton(4, BUTTON_PIN_5TH, PULLUP)
 };
 
 RTPRelay relaysArray[N_RELAYS] = {
@@ -78,8 +78,12 @@ void actOnSwitchLights(OSCMessage &msg, int addrOffset) {
   switchingLights.switchState();
 }
 
-void actOnButtonCallbacks(String callbackString) {
+void actOnButtonCallbacks(int ID, String callbackString) {
   if (callbackString == "CLICK" || callbackString == "DECLICK") {
+    Serial.print("BUTTON #");
+    Serial.print(ID + 1);
+    Serial.print(" ");
+    Serial.println(callbackString);
     OSCMessage msg("/state");      //creem un missatge OSC amb l'etiqueta /response
     for (int i = 0; i < N_INPUTS; i++)
       msg.add(buttonsArray[i].pressed());
