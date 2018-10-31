@@ -7,3 +7,8 @@
 #define N_OUTPUT_CHIPS 2
 #define MCP_0 0
 #define MCP_1 1
+
+#define mcpRead0Adress 0
+#define mcpRead1Adress 1
+#define mcpWrite0Adress 2//Defining address of the chip
+#define mcpWrite1Adress 3

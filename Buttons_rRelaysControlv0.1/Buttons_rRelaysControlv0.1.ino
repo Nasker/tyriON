@@ -32,9 +32,11 @@ RTPRelay switchingLights(SWITCHING_LIGHTS_PIN);
 
 void setup() {
   Serial.begin(115200);     //velocitat de comunicació amb el port serie
+  Serial.println("Initing setup");
   EthernetResetInitSeq();   //funció (definidad més abaix) de secuencia necesaria per inicialitzar modul ethernet!!
   Ethernet.begin(mac, selfIp);  //arranquem el modul d'ethernet
   Udp.begin(inPort);        //arranquem el port on escoltarem en Udp
+  Serial.println("Ending setup");
 }
 
 void loop() {

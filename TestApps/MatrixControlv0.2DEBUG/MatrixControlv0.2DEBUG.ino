@@ -48,14 +48,9 @@ int mcpRead1Last;
 
 void getMatrix(bool (& matrixLedState) [N_MATRIX_ELEMENTS + 1]) {
   for (int i = 0; i < N_PINS_CHIP ; i++) {
-    int j = 0;
-    matrixLedState[mcpReadsToMatrix[i][j]] = mcpRead0.digitalRead(i);
-    j++;
-    matrixLedState[mcpReadsToMatrix[i][j]] = mcpRead1.digitalRead(i);
+    matrixLedState[mcpReadsToMatrix[i][MCP_0]] = mcpRead0.digitalRead(i);
+    matrixLedState[mcpReadsToMatrix[i][MCP_1]] = mcpRead1.digitalRead(i);
   }
-  Serial.println();
-  //ledState[i] = matrixLedState
-  //memcpy(ledState, matrixLedState, sizeof(matrixLedState) + 1);
 }
 
 void printMatrixLedState(bool (& matrixLedState) [N_MATRIX_ELEMENTS + 1]) {
@@ -71,8 +66,8 @@ void printMatrixLedState(bool (& matrixLedState) [N_MATRIX_ELEMENTS + 1]) {
 void setMatrix(bool (& matrixLedState) [N_MATRIX_ELEMENTS + 1]) {
   for (int i = 0; i < N_MATRIX_ELEMENTS; i++) {
     switch (matrixToMCPWrites[i][0]) {
-      case MCP_0: mcpWrite0.digitalWrite(i, matrixLedState[matrixToMCPWrites[i][1]]); break;
-      case MCP_1: mcpWrite1.digitalWrite(i, matrixLedState[matrixToMCPWrites[i][1]]); break;
+      case MCP_0: mcpWrite0.digitalWrite(matrixToMCPWrites[i][1], matrixLedState[i]); break;
+      case MCP_1: mcpWrite1.digitalWrite(matrixToMCPWrites[i][1], matrixLedState[i]); break;
     }
   }
 }
@@ -84,6 +79,7 @@ void setup() {
   Ethernet.begin(mac, selfIp);  //arranquem el modul d'ethernet
   Udp.begin(inPort);        //arranquem el port on escoltarem en Udp
   matrixInit();
+  Serial.println("Finish setup!");
 }
 
 void loop() {
@@ -91,23 +87,23 @@ void loop() {
   bool matrixLedState[N_MATRIX_ELEMENTS + 1];
   getMatrix(matrixLedState);
   printMatrixLedState(matrixLedState);
-  // detectChangeCallback(actOnGPIOReadChanges); //detecta quan hi ha un canvi en el GPIO d'entrada i crida
+  detectChangeCallback(actOnGPIOReadChanges); //detecta quan hi ha un canvi en el GPIO d'entrada i crida
   //a la funció que hi ha com a argument (callback)
 
   //les dos crides següents son per testejar entrades i sortides
   //testInputMatrix();  //printa l'estat dels inputs
-  testOutputMatrix(); //loopeja al voltant de tots els outputs encenent-los i apagantlos secuencialment
-  // testOutputMatrix2();
+  testOutputMatrixLoop(); //loopeja al voltant de tots els outputs encenent-los i apagantlos secuencialment
 
   //delay(1000);
 }
 
-void matrixInit() {  //Inicialitza els cmcps de la matriu
+void matrixInit() {  //Inicialitza els MCPs de la matriu
   Serial.println("Init Constructing Matrix");
   mcpRead0.begin(mcpRead0Adress);
   mcpRead1.begin(mcpRead1Adress);
   mcpWrite0.begin(mcpWrite0Adress);
   mcpWrite1.begin(mcpWrite1Adress);
+  Serial.println("UnTill Here!");
   for (int i = 0; i < N_PINS_CHIP; i++) {
     mcpWrite0.pinMode(i, OUTPUT);
     mcpWrite1.pinMode(i, OUTPUT);
@@ -119,8 +115,8 @@ void matrixInit() {  //Inicialitza els cmcps de la matriu
   mcpRead0Last = mcpRead0.readGPIOAB();
   mcpRead1Last = mcpRead1.readGPIOAB();
   bool matrixInputState[N_MATRIX_ELEMENTS + 1];
-  //getMatrix(matrixInputState);
-  //setMatrix(matrixInputState);
+  getMatrix(matrixInputState);
+  setMatrix(matrixInputState);
   Serial.println("Finish Constructing Matrix");
 }
 
@@ -149,33 +145,24 @@ void detectChangeCallback(void (*f)(String)) {
   }
 }
 
-void testOutputMatrixSerial() {
-  if (Serial.available() > 0) {
-    // read the incoming byte:
-    byte incomingByte = Serial.read();
-    mcpWrite0.digitalWrite(incomingByte, HIGH);
-    // say what you got:
-    Serial.print("I received: ");
-    Serial.println(incomingByte, DEC);
+void testOutputMatrixLoop() {
+  for (int i = 0; i < N_MATRIX_ELEMENTS; i++) {
+    switch (matrixToMCPWrites[i][0]) {
+      case MCP_0:
+        mcpWrite0.digitalWrite(matrixToMCPWrites[i][1], true);
+        delay(50);
+        mcpWrite0.digitalWrite(matrixToMCPWrites[i][1], false);
+        break;
+      case MCP_1:
+        mcpWrite1.digitalWrite(matrixToMCPWrites[i][1], true);
+        delay(50);
+        mcpWrite1.digitalWrite(matrixToMCPWrites[i][1], false);
+        break;
+    }
   }
 }
 
-void testOutputMatrix() {
-  for (int i = 0; i < N_PINS_CHIP; i++) {
-    Serial.print("A: ");
-    Serial.println(i);
-    mcpWrite0.digitalWrite(i, HIGH);
-    delay(50);
-    mcpWrite0.digitalWrite(i, LOW);
-    Serial.print("B: ");
-    Serial.println(i);
-    mcpWrite1.digitalWrite(i, HIGH);
-    delay(50);
-    mcpWrite1.digitalWrite(i, LOW);
-  }
-}
-
-void testOutputMatrix2() {
+void testOutputMatrixBlink() {
   for (int i = 0; i < N_PINS_CHIP; i++) {
     mcpWrite0.digitalWrite(i, HIGH);
     mcpWrite1.digitalWrite(i, HIGH);
