@@ -1,14 +1,14 @@
 #include "MatrixControl.h"
 
-int mcpRead0Last;
-int mcpRead1Last;
-
 Adafruit_MCP23017 mcpRead0;
 Adafruit_MCP23017 mcpRead1;
 Adafruit_MCP23017 mcpWrite0;
 Adafruit_MCP23017 mcpWrite1;
 
-void matrixInit() {  //Inicialitza els MCPs de la matriu
+int mcpRead0Last;
+int mcpRead1Last;
+
+void matrixInit(bool (& matrixInputState) [N_MATRIX_ELEMENTS + 1]) {  //Inicialitza els MCPs de la matriu
   Serial.println("Init Constructing Matrix");
   mcpRead0.begin(mcpRead0Adress);
   mcpRead1.begin(mcpRead1Adress);
@@ -24,7 +24,7 @@ void matrixInit() {  //Inicialitza els MCPs de la matriu
   }
   mcpRead0Last = mcpRead0.readGPIOAB();
   mcpRead1Last = mcpRead1.readGPIOAB();
-  bool matrixInputState[N_MATRIX_ELEMENTS + 1];
+  //bool matrixInputState[N_MATRIX_ELEMENTS + 1];
   getMatrix(matrixInputState);
   setMatrix(matrixInputState);
   Serial.println("Finish Constructing Matrix");
@@ -69,13 +69,31 @@ void testOutputMatrixLoop() {
     switch (matrixToMCPWrites[i][0]) {
       case MCP_0:
         mcpWrite0.digitalWrite(matrixToMCPWrites[i][1], true);
-        delay(50);
+        delay(500);
         mcpWrite0.digitalWrite(matrixToMCPWrites[i][1], false);
         break;
       case MCP_1:
         mcpWrite1.digitalWrite(matrixToMCPWrites[i][1], true);
-        delay(50);
+        delay(500);
         mcpWrite1.digitalWrite(matrixToMCPWrites[i][1], false);
+        break;
+    }
+  }
+}
+
+void randomBlinkMatrix(bool (& matrixLedState) [N_MATRIX_ELEMENTS + 1]) {
+  int index = random(0, 31);
+  if (!matrixLedState[index]) {
+    switch (matrixToMCPWrites[index][0]) {
+      case MCP_0:
+        mcpWrite0.digitalWrite(matrixToMCPWrites[index][1], true);
+        delay(10);
+        mcpWrite0.digitalWrite(matrixToMCPWrites[index][1], false);
+        break;
+      case MCP_1:
+        mcpWrite1.digitalWrite(matrixToMCPWrites[index][1], true);
+        delay(10);
+        mcpWrite1.digitalWrite(matrixToMCPWrites[index][1], false);
         break;
     }
   }

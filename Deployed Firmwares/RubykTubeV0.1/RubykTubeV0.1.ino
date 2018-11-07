@@ -11,6 +11,7 @@ RgbColor green(0, colorSaturation, 0);
 RgbColor blue(0, 0, colorSaturation);
 RgbColor white(colorSaturation, colorSaturation, colorSaturation);
 RgbColor black(0);
+RgbColor connectStatusColor;
 
 WiFiUDP udp;
 ArduinoOSCWiFi osc;
@@ -25,6 +26,10 @@ RTPRotary rotariesArray[N_ROTARIES] = {
 RTPPeriodicBang iddleCounter(PERIOD_MILLIS, IDDLE_SECONDS);
 RTPBatteryControl batteryControl(VCC_LEVEL_PIN, FIREBEETLE_ADC_LEVELS);
 //RTPPsyPixel psyPixel(PIXEL_COUNT, PIXEL_PIN);
+
+
+bool connectionStatus = false;
+bool alreadySentBatteryStatus = false;
 
 unsigned long int blinkPastMillis;
 bool ledsOn = false;
@@ -81,10 +86,16 @@ void initWifiandOSC() {
     Serial.print("-");
     stripShowColor(black);//psyPixel.blackenStrip();//
   }
-  if (WiFi.status() == WL_CONNECTED)
+  if (WiFi.status() == WL_CONNECTED) {
     stripShowColor(green);//psyPixel.greenStrip();//
-  else
+    connectStatusColor = red;
+    connectionStatus = true;
+  }
+  else {
     stripShowColor(blue);//psyPixel.blueStrip(); //
+    connectStatusColor = blue;
+    connectionStatus = false;
+  }
 
   delay(500);
   stripShowColor(black); //psyPixel.blackenStrip(); //
@@ -135,23 +146,26 @@ void actOnReceiveOSCCallback(OSCMessage& m) {
 }
 
 void actOnBatteryCallback(String callbackString, float vccLevel) {
-  Serial.print(callbackString);
-  Serial.print(" and level is ");
-  Serial.print(vccLevel);
-  Serial.println("V");
+  if (alreadySentBatteryStatus == false) {
+    Serial.print(callbackString);
+    Serial.print(" and level is ");
+    Serial.print(vccLevel);
+    Serial.println("V");
 
-  Serial.println("SENDING BATTERY LEVEL OSC MESSAGE!");
-  OSCMessage msg;
-  msg.beginMessage(host, send_port);
-  msg.setOSCAddress("/status");
-  msg.addArgString(callbackString);
-  msg.addArgFloat(vccLevel);
-  osc.send(msg);
+    Serial.println("SENDING BATTERY LEVEL OSC MESSAGE!");
+    OSCMessage msg;
+    msg.beginMessage(host, send_port);
+    msg.setOSCAddress("/status");
+    msg.addArgString(callbackString);
+    msg.addArgFloat(vccLevel);
+    osc.send(msg);
+    alreadySentBatteryStatus = true;
+  }
 }
 
 void actOnRotaryCallback(int ID, String callbackString, int rotationDirection, int newPosition) {
   stripShowColor(black);//psyPixel.blackenStrip();//
-  stripShowColor(red);//psyPixel.psyColorStrip();//
+  stripShowColor(connectStatusColor);//psyPixel.psyColorStrip();//
   blinkPastMillis = millis();
   ledsOn = true;
   Serial.print("Rotary with ID #");
@@ -183,6 +197,9 @@ void actOnCounterTick(String callbackString, int ticksLeft) {
     Serial.print(callbackString);
     Serial.print("s left: #");
     Serial.println(ticksLeft);
+    if (ticksLeft == 55 && connectionStatus == false) {
+      esp_restart();
+    }
   }
   if (callbackString == "IDDLE EXPIRED") {
     OSCMessage msgSleep;
@@ -198,6 +215,7 @@ void onWiFiEvent(WiFiEvent_t event) {
   switch (event) {
     case SYSTEM_EVENT_STA_START: {
         Serial.println("STA Started");
+        //initWifiandOSC();
         break;
       }
     case SYSTEM_EVENT_STA_CONNECTED: {

@@ -20,17 +20,18 @@
 
 #define PERIOD_MILLIS 1000
 #define IDDLE_SECONDS 60
+
+
 #define BLINK_LENGTH 50
 
-
 //Now define WIFI constants
-const char* ssid = "NaisDelClot";
-const char* pwd = "xmp13051985";
-//const char* ssid = "E-TRON 2.4G"; //Antiloop
-//const char* password = "etron2017"; //Antiloop@MOB
+//const char* ssid = "NaisDelClot";
+const char* ssid = "MiFibra-9590";
+//const char* pwd = "xmp13051985";
+const char* pwd = "67qcuKC9"; 
 const IPAddress ip(192, 168, 1, 38);
 const IPAddress gateway(192, 168, 1, 1);
 const IPAddress subnet(255, 255, 255, 0);
-const char* host = "192.168.1.130";  //192.168.1.10
+const char* host = "192.168.1.10";  //192.168.1.143   
 const int recv_port = 8889;
 const int send_port = 8888;

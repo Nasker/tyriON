@@ -34,7 +34,7 @@ void mouseDragged() {
   myMessage.add(mouseX);
   myMessage.add(mouseY);
   oscP5.send(myMessage, myRemoteLocation);
-  //println("Sending Message!");
+  println("Sending: "+ "\t"+ mouseX+"\t"+mouseY);
   strokeWeight(constrain(map(dist(X, Y, pX, pY), 10, 1, 1, 10), 1, 10));
   line(X, Y, pX, pY);
   pX = X;

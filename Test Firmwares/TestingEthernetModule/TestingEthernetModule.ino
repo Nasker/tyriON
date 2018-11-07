@@ -11,7 +11,7 @@
 EthernetUDP Udp;                //objecte per a connexió udp
 IPAddress ip(192, 168, 1, 31);  //172, 16, 17, 172 //ip de la teensy i port on escoltem
 const unsigned int inPort  = 3312;
-IPAddress outIp(192, 168, 1, 144); //ip destí i port on enviarem
+IPAddress outIp(192, 168, 1, 143); //ip destí i port on enviarem
 const unsigned int outPort = 3311;
 byte mac[] = { 0x04, 0xE9, 0xE5, 0x03, 0x94, 0x5E }; //mac, patillera
 
@@ -20,6 +20,7 @@ int coordinateY = 0;
 
 void setup() {
   Serial.begin(115200);     //veloctitat de comunicació amb el port serie
+  delay(1000);
   EthernetResetInitSeq();   //funció (definidad més abaix) de secuencia necesaria per inicialitzar modul ethernet!!
   Ethernet.begin(mac, ip);  //arranquem el modul d'ethernet
   Udp.begin(inPort);        //arranquem el port on escoltarem en Udp
@@ -28,6 +29,7 @@ void setup() {
 
 void loop() {
   OSCMsgReceive();    //al loop només esperem a rebre missatges OSC
+  //Serial.println(millis());
 }
 
 void OSCMsgReceive() {

@@ -14,7 +14,7 @@
 EthernetUDP Udp;                //objecte per a connexió udp
 IPAddress selfIp(192, 168, 1, 37);  //172, 16, 17, 172 //ip de la teensy i port on escoltem
 const unsigned int inPort  = 3372;
-IPAddress outIp(192, 168, 1, 144); //ip destí i port on enviarem  192, 168, 1, 10
+IPAddress outIp( 192, 168, 1, 10); //ip destí i port on enviarem  192, 168, 1, 143
 const unsigned int outPort = 3371;
 byte mac[] = { 0x04, 0xE9, 0xE5, 0x03, 0x94, 0x7E }; //mac, patillera
 
@@ -68,6 +68,7 @@ void OSCMsgReceive() {
 }
 
 void actOnResetMessage(OSCMessage &msg, int addrOffset) {
+  Serial.println("Reset message received!");
   for (int i = 0; i < N_RELAYS; i++)
     relaysArray[i].setState(false);
 }
@@ -88,15 +89,16 @@ void actOnResetMessage(OSCMessage &msg, int addrOffset) {
 
 void actOnPhotoDiodeCallbacks(int ID, String callbackString) {
   Serial.println(callbackString);
-  if (callbackString == "ON") {
+  if (callbackString == "ON" && !relaysArray[ID].getState() && !plugSensor.pressed()) {
     OSCMessage msg("/state");      //creem un missatge OSC amb l'etiqueta /response
     relaysArray[ID].setState(true);
     Serial.print("ID activated #");
     Serial.println(ID);
     for (int i = 0; i < N_INPUTS; i++) {
-      Serial.print(photoDiodesArray[i].overThreshold());
-      msg.add(photoDiodesArray[i].overThreshold());
+      Serial.print(relaysArray[i].getState());
+      msg.add(relaysArray[i].getState());
     }
+    Serial.println();
     Udp.beginPacket(outIp, outPort);      //Comenvem un paquet de transmissio Udp
     msg.send(Udp);                  //l'enviem
     Udp.endPacket();              //tanquem el paquet
@@ -106,15 +108,19 @@ void actOnPhotoDiodeCallbacks(int ID, String callbackString) {
 
 void actOnPlugSensorCallback (int ID, String callbackString) {
   Serial.println(callbackString);
-  if (callbackString == "DECLICK"  || callbackString == "CLICK") {
+  if (callbackString == "DECLICK" || callbackString == "CLICK") {
     relaysArray[4].setState(!plugSensor.pressed());
-    OSCMessage msg("/state");      //creem un missatge OSC amb l'etiqueta /response
+    OSCMessage msg("/active");      //creem un missatge OSC amb l'etiqueta /response
     msg.add(!plugSensor.pressed());
     Serial.println(!plugSensor.pressed());
     Udp.beginPacket(outIp, outPort);      //Comenvem un paquet de transmissio Udp
     msg.send(Udp);                  //l'enviem
     Udp.endPacket();              //tanquem el paquet
     msg.empty();
+  }
+  if (callbackString == "CLICK") {
+    for (int i = 0; i < N_RELAYS; i++)
+      relaysArray[i].setState(false);
   }
 }
 

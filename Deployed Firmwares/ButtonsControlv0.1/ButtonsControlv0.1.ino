@@ -12,7 +12,7 @@
 EthernetUDP Udp;                //objecte per a connexió udp
 IPAddress selfIp(192, 168, 1, 36);  //172, 16, 17, 172 //ip de la teensy i port on escoltem
 const unsigned int inPort  = 3362;
-IPAddress outIp(192, 168, 1, 144); //ip destí i port on enviarem  192, 168, 1, 10
+IPAddress outIp(192, 168, 1, 10); //ip destí i port on enviarem  192, 168, 1, 10
 const unsigned int outPort = 3361;
 byte mac[] = { 0x04, 0xE9, 0xE5, 0x03, 0x94, 0x6E }; //mac, patillera
 

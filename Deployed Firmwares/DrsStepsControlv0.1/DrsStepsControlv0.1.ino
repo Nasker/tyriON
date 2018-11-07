@@ -13,7 +13,7 @@
 EthernetUDP Udp;                //objecte per a connexió udp
 IPAddress selfIp(192, 168, 1, 32);  //172, 16, 17, 172 //ip de la teensy i port on escoltem
 const unsigned int inPort  = 3322;
-IPAddress outIp(192, 168, 1, 130); //ip destí i port on enviarem //192, 168, 1, 10
+IPAddress outIp(192, 168, 1, 10); //ip destí i port on enviarem //192, 168, 1, 10
 const unsigned int outPort = 3321;
 byte mac[] = { 0x04, 0xE9, 0xE5, 0x03, 0x94, 0x2E }; //mac, patillera
 
@@ -25,7 +25,7 @@ RTPButton inputsArray[N_INPUTS] = {
 };
 
 RTPRelay relaysArray[N_RELAYS] = {
-  RTPRelay(RELAY_PIN_1ST), RTPRelay(RELAY_PIN_2ND)
+  RTPRelay(RELAY_PIN_1ST, true), RTPRelay(RELAY_PIN_2ND, true)
 };
 
 void setup() {
@@ -84,8 +84,11 @@ void actOnStepsCallbacks(int ID, String callbackString) {
     Serial.print(" ");
     Serial.println(callbackString);
     OSCMessage msg("/state");      //creem un missatge OSC amb l'etiqueta /response
-    for (int i = 0; i < N_INPUTS; i++)
-      msg.add(inputsArray[i].pressed());
+    for (int i = 0; i < N_INPUTS; i++) {
+      msg.add(!inputsArray[i].pressed());
+      Serial.print(!inputsArray[i].pressed());
+    }
+    Serial.println();
     Udp.beginPacket(outIp, outPort);      //Comenvem un paquet de transmissio Udp
     msg.send(Udp);                  //l'enviem
     Udp.endPacket();              //tanquem el paquet
