@@ -23,7 +23,7 @@ byte mac[] = { 0x04, 0xE9, 0xE5, 0x03, 0x94, 0x5E }; //mac, patillera
 
 LIDARLite lidar;
 RTPSmooth smoothie;
-RTPSmartRange lidarRange(0, 1, 200, 0, 200);
+RTPSmartRange lidarRange(0, 1, 500, 0, 500);
 
 void setup() {
   Serial.begin(115200);     //velocitat de comunicació amb el port serie

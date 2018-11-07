@@ -1,6 +1,6 @@
-#define N_RELAYS 5
+#define N_RELAYS 1
 #define RELAY_PIN_1ST 20
-#define RELAY_PIN_2ND 22
+#define RELAY_PIN_2ND 17
 #define RELAY_PIN_3RD 4
 #define RELAY_PIN_4TH 6
 #define SWITCHING_LIGHTS_PIN 8
@@ -8,9 +8,9 @@
 #include <RTPRelay.h>
 
 RTPRelay relaysArray[N_RELAYS] = {
-  RTPRelay(RELAY_PIN_1ST), RTPRelay(RELAY_PIN_2ND),
-  RTPRelay(RELAY_PIN_3RD), RTPRelay(RELAY_PIN_4TH),
-  RTPRelay(SWITCHING_LIGHTS_PIN),
+  RTPRelay(RELAY_PIN_1ST), //RTPRelay(RELAY_PIN_2ND),
+  //RTPRelay(RELAY_PIN_3RD), RTPRelay(RELAY_PIN_4TH),
+  //RTPRelay(SWITCHING_LIGHTS_PIN),
 };
 
 //RTPRelay switchingLights(SWITCHING_LIGHTS_PIN);

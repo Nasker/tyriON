@@ -25,7 +25,7 @@ RTPButton inputsArray[N_INPUTS] = {
 };
 
 RTPRelay relaysArray[N_RELAYS] = {
-  RTPRelay(RELAY_PIN_1ST, true), RTPRelay(RELAY_PIN_2ND, true)
+  RTPRelay(TUBE_HOLDER_RELAY_PIN, true), RTPRelay(LIGHT_RELAY_PIN, true)
 };
 
 void setup() {
@@ -56,18 +56,18 @@ void OSCMsgReceive() {
 }
 
 void actOnOpenRelay(OSCMessage &msg, int addrOffset) {
-  int relayIndex = msg.getInt(0);    //desempaquetem els Integers que ens venen
+  int relayID = msg.getInt(0);    //desempaquetem els Integers que ens venen
   Serial.print("Opening relay #");
-  Serial.println(relayIndex + 1);
-  if (relayIndex == 1) {
-    relaysArray[relayIndex].setState(true);
-    for (int i = 0; i < 10; i++) {
-      relaysArray[relayIndex].switchState();
-      delay(50);
+  Serial.println(relayID);
+  if (relayID == TUBE_HOLDER_RELAY_ID) {
+    relaysArray[TUBE_HOLDER_RELAY_ID].setState(true);
+    for (int i = 0; i < 60; i++) {
+      relaysArray[LIGHT_RELAY_ID].switchState();
+      delay(100);
     }
-    relaysArray[relayIndex].setState(false);
+    relaysArray[LIGHT_RELAY_ID].setState(false);
+    relaysArray[TUBE_HOLDER_RELAY_ID].setState(false);
   }
-  relaysArray[relayIndex].setState(true);
 }
 
 void actOnCloseRelay(OSCMessage &msg, int addrOffset) {

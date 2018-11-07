@@ -13,5 +13,8 @@
 
 
 #define N_RELAYS 2
-#define RELAY_PIN_1ST 20
-#define RELAY_PIN_2ND 22
+#define TUBE_HOLDER_RELAY_PIN 20
+#define LIGHT_RELAY_PIN 22
+
+#define TUBE_HOLDER_RELAY_ID 0
+#define LIGHT_RELAY_ID 1

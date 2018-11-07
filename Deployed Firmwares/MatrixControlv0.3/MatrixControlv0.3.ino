@@ -11,7 +11,7 @@
 EthernetUDP Udp;                //objecte per a connexió udp
 IPAddress selfIp(192, 168, 1, 34);  //172, 16, 17, 172 //ip de la teensy i port on escoltem
 const unsigned int inPort  = 3342;
-IPAddress outIp(192, 168, 1, 10); //ip destí i port on enviarem  192, 168, 1, 138
+IPAddress outIp(192, 168, 1, 120); //ip destí i port on enviarem  192, 168, 1, 138
 const unsigned int outPort = 3341;
 byte mac[] = { 0x04, 0xE9, 0xE5, 0x03, 0x94, 0x4E }; //mac, patillera
 
@@ -28,18 +28,11 @@ void setup() {
 }
 
 void loop() {
-
   getMatrix(matrixInputState);
   setMatrix(matrixInputState);
-  //testOutputMatrixBlink();
   randomBlinkMatrix(matrixInputState);
-  //testOutputMatrixBlink();
-  //printMatrixLedState(matrixInputState);
   detectChangeCallback(actOnGPIOReadChanges); //detecta quan hi ha un canvi en el GPIO d'entrada i crida
   //a la funció que hi ha com a argument (callback)
-  //les dos crides següents son per testejar entrades i sortides
-  //testInputMatrix();  //printa l'estat dels inputs
-  //testOutputMatrixLoop(); //loopeja al voltant de tots els outputs encenent-los i apagantlos secuencialment
 }
 
 void actOnGPIOReadChanges(String callbackString) {
