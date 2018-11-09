@@ -123,6 +123,12 @@ void keyPressed() {
     oscP5_relays.send(myMessage, relaysHost);
     println("Switching Lights!");
   }
+  if (key == '(') {
+    OscMessage myMessage = new OscMessage("/switchLights");
+    myMessage.add(1);
+    oscP5_relays.send(myMessage, relaysHost);
+    println("Switching Lights!");
+  }
   if (key == 'a') {
     OscMessage myMessage = new OscMessage("/open");
     myMessage.add(0);
@@ -189,19 +195,19 @@ void keyPressed() {
     oscP5_steps.send(myMessage, stepsHost);
     println("Opening Steps 1st relay");
   }
-    if (key == 'x') {
+  if (key == 'x') {
     OscMessage myMessage = new OscMessage("/open");
     myMessage.add(1);
     oscP5_steps.send(myMessage, stepsHost);
     println("Opening Steps 2nd relay");
   }
-    if (key == 'Z') {
+  if (key == 'Z') {
     OscMessage myMessage = new OscMessage("/close");
     myMessage.add(0);
     oscP5_steps.send(myMessage, stepsHost);
     println("Closing Steps 1st relay");
   }
-    if (key == 'X') {
+  if (key == 'X') {
     OscMessage myMessage = new OscMessage("/close");
     myMessage.add(1);
     oscP5_steps.send(myMessage, stepsHost);

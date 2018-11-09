@@ -9,9 +9,16 @@
 
 #define PLUG_SENSOR_PIN 0
 
-#define N_RELAYS 5
-#define RELAY_PIN_1ST 2
-#define RELAY_PIN_2ND 4
-#define RELAY_PIN_3RD 6
-#define RELAY_PIN_4TH 8
-#define RELAY_PIN_5TH 14 
+#define N_LIGHT_RELAYS 4
+#define LIGHT_RELAY_PIN_1ST 2
+#define LIGHT_RELAY_PIN_2ND 4
+#define LIGHT_RELAY_PIN_3RD 6
+#define LIGHT_RELAY_PIN_4TH 8
+
+#define LASER_RELAY_PIN 25 
+#define HAZER_RELAY_PIN 26
+
+//#define LASER_RELAY_ID 4
+//#define HAZER_RELAY_ID 5
+
+#define HAZER_PERIOD_MILLIS 2000

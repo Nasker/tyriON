@@ -8,6 +8,8 @@
 #include <RTPPhotoDiodeTrigger.h>
 #include <RTPRelay.h>
 #include <RTPButton.h>
+#include <RTPPeriodicBang.h>
+
 #include "EthernetResetInitSeq.h"
 #include "PinsAndConstants.h"
 
@@ -23,13 +25,19 @@ RTPPhotoDiodeTrigger photoDiodesArray[N_INPUTS] = {
   RTPPhotoDiodeTrigger(2, PHOTODIODE_PIN_3RD), RTPPhotoDiodeTrigger(3, PHOTODIODE_PIN_4TH)
 };
 
-RTPRelay relaysArray[N_RELAYS] = {
-  RTPRelay(RELAY_PIN_1ST), RTPRelay(RELAY_PIN_2ND),
-  RTPRelay(RELAY_PIN_3RD), RTPRelay(RELAY_PIN_4TH),
-  RTPRelay(RELAY_PIN_5TH)
+RTPRelay relaysArray[N_LIGHT_RELAYS] = {
+  RTPRelay(LIGHT_RELAY_PIN_1ST), RTPRelay(LIGHT_RELAY_PIN_2ND),
+  RTPRelay(LIGHT_RELAY_PIN_3RD), RTPRelay(LIGHT_RELAY_PIN_4TH),
 };
 
+RTPRelay laserRelay(LASER_RELAY_PIN, true);
+RTPRelay hazerRelay(HAZER_RELAY_PIN, true);
+
 RTPButton plugSensor(0, PLUG_SENSOR_PIN, NORMAL);
+
+RTPPeriodicBang hazerTimer(HAZER_PERIOD_MILLIS);
+
+unsigned long int hazerCounter = 0;
 
 void setup() {
   Serial.begin(115200);     //velocitat de comunicació amb el port serie
@@ -37,8 +45,8 @@ void setup() {
   Ethernet.begin(mac, selfIp);  //arranquem el modul d'ethernet
   Udp.begin(inPort);        //arranquem el port on escoltarem en Udp
   for (int i = 0; i < N_INPUTS; i++)
-    photoDiodesArray[i].setThreshold(300);
-  for (int i = 0; i < N_RELAYS; i++)
+    photoDiodesArray[i].setThreshold(200);
+  for (int i = 0; i < N_LIGHT_RELAYS; i++)
     relaysArray[i].setState(false);
 }
 
@@ -50,6 +58,7 @@ void loop() {
   }
   //Serial.println();
   plugSensor.callback(actOnPlugSensorCallback);
+  hazerTimer.callbackPeriodBang(actOnHazerTimerCallback);
 }
 
 void OSCMsgReceive() {
@@ -69,7 +78,7 @@ void OSCMsgReceive() {
 
 void actOnResetMessage(OSCMessage &msg, int addrOffset) {
   Serial.println("Reset message received!");
-  for (int i = 0; i < N_RELAYS; i++)
+  for (int i = 0; i < N_LIGHT_RELAYS; i++)
     relaysArray[i].setState(false);
 }
 /*
@@ -108,8 +117,8 @@ void actOnPhotoDiodeCallbacks(int ID, String callbackString) {
 
 void actOnPlugSensorCallback (int ID, String callbackString) {
   Serial.println(callbackString);
-  if (callbackString == "DECLICK" || callbackString == "CLICK") {
-    relaysArray[4].setState(!plugSensor.pressed());
+  if (callbackString == "DECLICK") {
+    laserRelay.setState(true);
     OSCMessage msg("/active");      //creem un missatge OSC amb l'etiqueta /response
     msg.add(!plugSensor.pressed());
     Serial.println(!plugSensor.pressed());
@@ -119,8 +128,23 @@ void actOnPlugSensorCallback (int ID, String callbackString) {
     msg.empty();
   }
   if (callbackString == "CLICK") {
-    for (int i = 0; i < N_RELAYS; i++)
+    for (int i = 0; i < N_LIGHT_RELAYS; i++)
       relaysArray[i].setState(false);
+    laserRelay.setState(false);
+  }
+}
+
+void actOnHazerTimerCallback(String callbackString) {
+  if (!plugSensor.pressed()) {
+    if (hazerCounter < 3) {
+      hazerRelay.setState(false);
+      hazerCounter++;
+    }
+    else {
+      hazerRelay.setState(true);
+      hazerCounter = 0;
+    }
+
   }
 }
 
