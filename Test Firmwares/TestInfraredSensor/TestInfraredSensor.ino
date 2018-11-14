@@ -17,7 +17,7 @@ void loop() {
   hall.callback(actOnCallback);
 }
 
-void actOnCallback(String callbackString){
+void actOnCallback(int ID, String callbackString){
   Serial.println(callbackString);
 }
 

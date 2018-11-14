@@ -45,7 +45,7 @@ void setup() {
   Ethernet.begin(mac, selfIp);  //arranquem el modul d'ethernet
   Udp.begin(inPort);        //arranquem el port on escoltarem en Udp
   for (int i = 0; i < N_INPUTS; i++)
-    photoDiodesArray[i].setThreshold(200);
+    photoDiodesArray[i].setThreshold(100);
   for (int i = 0; i < N_LIGHT_RELAYS; i++)
     relaysArray[i].setState(false);
 }

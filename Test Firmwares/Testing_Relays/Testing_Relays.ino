@@ -1,5 +1,5 @@
 #define N_RELAYS 1
-#define RELAY_PIN_1ST 20
+#define RELAY_PIN_1ST 17
 #define RELAY_PIN_2ND 17
 #define RELAY_PIN_3RD 4
 #define RELAY_PIN_4TH 6

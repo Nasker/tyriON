@@ -9,8 +9,6 @@
 #define ROT_RIGHT_PIN3 GPIO_NUM_10
 #define ROT_LEFT_PIN3 GPIO_NUM_13
 
-#define BUTTON_PIN 0
-
 RTPRotary rotaryClick1(1, ROT_RIGHT_PIN1, ROT_LEFT_PIN1);
 RTPRotary rotaryClick2(2, ROT_RIGHT_PIN2, ROT_LEFT_PIN2);
 RTPRotary rotaryClick3(3, ROT_RIGHT_PIN3, ROT_LEFT_PIN3);
@@ -21,16 +19,19 @@ void setup() {
 }
 
 void loop() {
-  rotaryClick1.callbackOnRotation(actOnRotCallback);
-  rotaryClick2.callbackOnRotation(actOnRotCallback);
-  rotaryClick3.callbackOnRotation(actOnRotCallback);
+  rotaryClick1.callbackOnRotation(actOnRotaryCallback);
+  rotaryClick2.callbackOnRotation(actOnRotaryCallback);
+  rotaryClick3.callbackOnRotation(actOnRotaryCallback);
 }
 
-void actOnRotCallback(int ID, String callbackString, int newPosition) {
+void actOnRotaryCallback(int ID, String callbackString, int rotationDirection, int newPosition) {
   Serial.print("Rotary with ID #");
   Serial.print(ID);
   Serial.print(" ");
   Serial.print(callbackString);
+  Serial.print("\t-Direction: ");
+  Serial.print(rotationDirection);
   Serial.print("\t-Position: ");
   Serial.println(newPosition);
+
 }

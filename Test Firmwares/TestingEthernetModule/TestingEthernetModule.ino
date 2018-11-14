@@ -9,9 +9,9 @@
 #define ETHERNET_CS_PIN 10
 
 EthernetUDP Udp;                //objecte per a connexió udp
-IPAddress ip(192, 168, 1, 31);  //172, 16, 17, 172 //ip de la teensy i port on escoltem
+IPAddress ip(172, 16, 17, 144);  //172, 16, 17, 172 //ip de la teensy i port on escoltem
 const unsigned int inPort  = 3312;
-IPAddress outIp(192, 168, 1, 143); //ip destí i port on enviarem
+IPAddress outIp(172, 16, 17, 143); //ip destí i port on enviarem
 const unsigned int outPort = 3311;
 byte mac[] = { 0x04, 0xE9, 0xE5, 0x03, 0x94, 0x5E }; //mac, patillera
 
