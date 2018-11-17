@@ -21,8 +21,10 @@ const unsigned int outPort = 3371;
 byte mac[] = { 0x04, 0xE9, 0xE5, 0x03, 0x94, 0x7E }; //mac, patillera
 
 RTPPhotoDiodeTrigger photoDiodesArray[N_INPUTS] = {
-  RTPPhotoDiodeTrigger(0, PHOTODIODE_PIN_1ST), RTPPhotoDiodeTrigger(1, PHOTODIODE_PIN_2ND),
-  RTPPhotoDiodeTrigger(2, PHOTODIODE_PIN_3RD), RTPPhotoDiodeTrigger(3, PHOTODIODE_PIN_4TH)
+  RTPPhotoDiodeTrigger(PHOTODIODE_ID_1ST, PHOTODIODE_PIN_1ST),
+  RTPPhotoDiodeTrigger(PHOTODIODE_ID_2ND, PHOTODIODE_PIN_2ND),
+  RTPPhotoDiodeTrigger(PHOTODIODE_ID_3RD, PHOTODIODE_PIN_3RD),
+  RTPPhotoDiodeTrigger(PHOTODIODE_ID_4TH, PHOTODIODE_PIN_4TH)
 };
 
 RTPRelay relaysArray[N_LIGHT_RELAYS] = {
@@ -45,7 +47,7 @@ void setup() {
   Ethernet.begin(mac, selfIp);  //arranquem el modul d'ethernet
   Udp.begin(inPort);        //arranquem el port on escoltarem en Udp
   for (int i = 0; i < N_INPUTS; i++)
-    photoDiodesArray[i].setThreshold(100);
+    photoDiodesArray[i].setThreshold(200);
   for (int i = 0; i < N_LIGHT_RELAYS; i++)
     relaysArray[i].setState(false);
 }
@@ -73,6 +75,7 @@ void OSCMsgReceive() {
     //bundleIN.route("/open", actOnOpenRelay);  //"Rutejem el rebut a l'etiqueta i la funció que cidrem mes abaix.
     //bundleIN.route("/close", actOnCloseRelay);
     bundleIN.route("/reset", actOnResetMessage);
+    bundleIN.route("/photodiodeThresholdSet", actOnPhotodiodeThresholdSet);
   }
 }
 
@@ -80,6 +83,11 @@ void actOnResetMessage(OSCMessage &msg, int addrOffset) {
   Serial.println("Reset message received!");
   for (int i = 0; i < N_LIGHT_RELAYS; i++)
     relaysArray[i].setState(false);
+}
+
+void actOnPhotodiodeThresholdSet(OSCMessage &msg, int addrOffset) {
+  Serial.println("Photodiode threshold setting message received!");
+  photoDiodesArray[msg.getInt(0)].setThreshold(msg.getInt(1));
 }
 /*
   void actOnOpenRelay(OSCMessage &msg, int addrOffset) {

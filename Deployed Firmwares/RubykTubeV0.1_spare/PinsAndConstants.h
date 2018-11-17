@@ -25,10 +25,8 @@
 #define BLINK_LENGTH 50
 
 //Now define WIFI constants
-//const char* ssid = "NaisDelClot";
-const char* ssid = "MiFibra-9590";
-//const char* pwd = "xmp13051985";
-const char* pwd = "67qcuKC9"; 
+const char* ssid = "etron room";
+const char* pwd = "etron2018"; 
 const IPAddress ip(192, 168, 1, 39);
 const IPAddress gateway(192, 168, 1, 1);
 const IPAddress subnet(255, 255, 255, 0);
