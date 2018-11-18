@@ -69,18 +69,6 @@ void keyPressed() {
     oscP5_relays.send(myMessage, relaysHost);
     println("Opening 4th relay!");
   }
-  if (key == '5') {
-    OscMessage myMessage = new OscMessage("/open");
-    myMessage.add(4);
-    oscP5_relays.send(myMessage, relaysHost);
-    println("Opening 5th relay!");
-  }
-  if (key == '6') {
-    OscMessage myMessage = new OscMessage("/open");
-    myMessage.add(5);
-    oscP5_relays.send(myMessage, relaysHost);
-    println("Opening 6th relay!");
-  }
   if (key == '!') {
     OscMessage myMessage = new OscMessage("/close");
     myMessage.add(0);
@@ -104,18 +92,6 @@ void keyPressed() {
     myMessage.add(3);
     oscP5_relays.send(myMessage, relaysHost);
     println("Closing 4th relay!");
-  }
-  if (key == '%') {
-    OscMessage myMessage = new OscMessage("/close");
-    myMessage.add(4);
-    oscP5_relays.send(myMessage, relaysHost);
-    println("Closing 5th relay!");
-  }
-  if (key == '&') {
-    OscMessage myMessage = new OscMessage("/close");
-    myMessage.add(5);
-    oscP5_relays.send(myMessage, relaysHost);
-    println("Closing 6th relay!");
   }
   if (key == '8') {
     OscMessage myMessage = new OscMessage("/switchLights");

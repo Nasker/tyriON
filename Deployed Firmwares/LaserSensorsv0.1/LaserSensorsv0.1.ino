@@ -47,7 +47,7 @@ void setup() {
   Ethernet.begin(mac, selfIp);  //arranquem el modul d'ethernet
   Udp.begin(inPort);        //arranquem el port on escoltarem en Udp
   for (int i = 0; i < N_INPUTS; i++)
-    photoDiodesArray[i].setThreshold(200);
+    photoDiodesArray[i].setThreshold(PHOTODIODE_TRESHOLD_DEFAULT);
   for (int i = 0; i < N_LIGHT_RELAYS; i++)
     relaysArray[i].setState(false);
 }
@@ -56,9 +56,9 @@ void loop() {
   OSCMsgReceive();    //esperem a rebre missatges OSC
   for (int i = 0; i < N_INPUTS; i++) {
     photoDiodesArray[i].readnShoot(actOnPhotoDiodeCallbacks);
-    //photoDiodesArray[i].printReading();
+    photoDiodesArray[i].printReading();
   }
-  //Serial.println();
+  Serial.println();
   plugSensor.callback(actOnPlugSensorCallback);
   hazerTimer.callbackPeriodBang(actOnHazerTimerCallback);
 }
@@ -72,7 +72,7 @@ void OSCMsgReceive() {
     while (size--) {
       bundleIN.fill(Udp.read()); //plenem el bundle amb el que llegim al port Udp
     }
-    //bundleIN.route("/open", actOnOpenRelay);  //"Rutejem el rebut a l'etiqueta i la funció que cidrem mes abaix.
+    //bundleIN.route("/open", actOnOpenRelay);  //"Rutejem el rebut a l'etiqueta i la funció que cridem mes abaix.
     //bundleIN.route("/close", actOnCloseRelay);
     bundleIN.route("/reset", actOnResetMessage);
     bundleIN.route("/photodiodeThresholdSet", actOnPhotodiodeThresholdSet);
@@ -144,7 +144,7 @@ void actOnPlugSensorCallback (int ID, String callbackString) {
 
 void actOnHazerTimerCallback(String callbackString) {
   if (!plugSensor.pressed()) {
-    if (hazerCounter < 3) {
+    if (hazerCounter < 8) {
       hazerRelay.setState(false);
       hazerCounter++;
     }
