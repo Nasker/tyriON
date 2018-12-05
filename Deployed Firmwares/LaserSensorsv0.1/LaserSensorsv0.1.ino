@@ -16,6 +16,7 @@
 EthernetUDP Udp;                //objecte per a connexió udp
 IPAddress selfIp(192, 168, 1, 37);  //172, 16, 17, 172 //ip de la teensy i port on escoltem
 const unsigned int inPort  = 3372;
+
 IPAddress outIp( 192, 168, 1, 10); //ip destí i port on enviarem  192, 168, 1, 143
 const unsigned int outPort = 3371;
 byte mac[] = { 0x04, 0xE9, 0xE5, 0x03, 0x94, 0x7E }; //mac, patillera
@@ -27,6 +28,10 @@ RTPPhotoDiodeTrigger photoDiodesArray[N_INPUTS] = {
   RTPPhotoDiodeTrigger(PHOTODIODE_ID_4TH, PHOTODIODE_PIN_4TH)
 };
 
+int defaultThresholds[] = { PHOTODIODE_TRESHOLD_DEFAULT_1ST, PHOTODIODE_TRESHOLD_DEFAULT_2ND,
+                            PHOTODIODE_TRESHOLD_DEFAULT_3RD, PHOTODIODE_TRESHOLD_DEFAULT_4TH
+                          };
+
 RTPRelay relaysArray[N_LIGHT_RELAYS] = {
   RTPRelay(LIGHT_RELAY_PIN_1ST), RTPRelay(LIGHT_RELAY_PIN_2ND),
   RTPRelay(LIGHT_RELAY_PIN_3RD), RTPRelay(LIGHT_RELAY_PIN_4TH),
@@ -37,9 +42,9 @@ RTPRelay hazerRelay(HAZER_RELAY_PIN, true);
 
 RTPButton plugSensor(0, PLUG_SENSOR_PIN, NORMAL);
 
-RTPPeriodicBang hazerTimer(HAZER_PERIOD_MILLIS);
-
-unsigned long int hazerCounter = 0;
+//RTPPeriodicBang hazerTimer(HAZER_PERIOD_MILLIS);
+//unsigned long int hazerCounter = 0;
+unsigned long int smokeMillisEnd = 0;
 
 void setup() {
   Serial.begin(115200);     //velocitat de comunicació amb el port serie
@@ -47,7 +52,7 @@ void setup() {
   Ethernet.begin(mac, selfIp);  //arranquem el modul d'ethernet
   Udp.begin(inPort);        //arranquem el port on escoltarem en Udp
   for (int i = 0; i < N_INPUTS; i++)
-    photoDiodesArray[i].setThreshold(PHOTODIODE_TRESHOLD_DEFAULT);
+    photoDiodesArray[i].setThreshold(defaultThresholds[i]);
   for (int i = 0; i < N_LIGHT_RELAYS; i++)
     relaysArray[i].setState(false);
 }
@@ -60,7 +65,8 @@ void loop() {
   }
   Serial.println();
   plugSensor.callback(actOnPlugSensorCallback);
-  hazerTimer.callbackPeriodBang(actOnHazerTimerCallback);
+  //hazerTimer.callbackPeriodBang(actOnHazerTimerCallback);
+  controlHazerTimed();
 }
 
 void OSCMsgReceive() {
@@ -76,19 +82,50 @@ void OSCMsgReceive() {
     //bundleIN.route("/close", actOnCloseRelay);
     bundleIN.route("/reset", actOnResetMessage);
     bundleIN.route("/photodiodeThresholdSet", actOnPhotodiodeThresholdSet);
+    bundleIN.route("/lightsRemoteSetting", actOnLightsRemoteSetting);
+    bundleIN.route("/smoke", actOnRemoteSmokeBang);
   }
 }
 
-void actOnResetMessage(OSCMessage &msg, int addrOffset) {
+void actOnRemoteSmokeBang(OSCMessage &msg, int addrOffset) {
+  Serial.println("Smoke Control message received!");
+  smokeMillisEnd = millis() + msg.getInt(0);
+  hazerRelay.setState(true);
+}
+
+void controlHazerTimed() {
+  if (hazerRelay.getState() && millis() >= smokeMillisEnd) {
+    hazerRelay.setState(false);
+    smokeMillisEnd = 0;
+  }
+}
+
+void actOnResetMessage(OSCMessage & msg, int addrOffset) {
   Serial.println("Reset message received!");
   for (int i = 0; i < N_LIGHT_RELAYS; i++)
     relaysArray[i].setState(false);
 }
 
-void actOnPhotodiodeThresholdSet(OSCMessage &msg, int addrOffset) {
+void actOnPhotodiodeThresholdSet(OSCMessage & msg, int addrOffset) {
   Serial.println("Photodiode threshold setting message received!");
   photoDiodesArray[msg.getInt(0)].setThreshold(msg.getInt(1));
 }
+
+void actOnLightsRemoteSetting(OSCMessage & msg, int addrOffset) {
+  Serial.println("Lights remote setting message received!");
+  int relayID = msg.getInt(0);
+  boolean relayState = msg.getInt(1) == 1;
+  switch (relayID) {
+    case ALL_LIGHTS:
+      for (int i = 0; i < N_LIGHT_RELAYS; i++)
+        relaysArray[i].setState(relayState);
+      break;
+    default:
+      relaysArray[relayID].setState(relayState);
+      break;
+  }
+}
+
 /*
   void actOnOpenRelay(OSCMessage &msg, int addrOffset) {
   int relayIndex = msg.getInt(0);    //desempaquetem els Integers que ens venen
@@ -141,8 +178,8 @@ void actOnPlugSensorCallback (int ID, String callbackString) {
     laserRelay.setState(false);
   }
 }
-
-void actOnHazerTimerCallback(String callbackString) {
+/*
+  void actOnHazerTimerCallback(String callbackString) {
   if (!plugSensor.pressed()) {
     if (hazerCounter < 8) {
       hazerRelay.setState(false);
@@ -154,5 +191,5 @@ void actOnHazerTimerCallback(String callbackString) {
     }
 
   }
-}
-
+  }
+*/

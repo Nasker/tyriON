@@ -12,3 +12,5 @@
 #define mcpRead1Adress 1
 #define mcpWrite0Adress 2//Defining address of the chip
 #define mcpWrite1Adress 3
+
+#define TIME_TO_RESET 300000

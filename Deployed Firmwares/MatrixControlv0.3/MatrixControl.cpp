@@ -87,12 +87,12 @@ void randomBlinkMatrix(bool (& matrixLedState) [N_MATRIX_ELEMENTS + 1]) {
     switch (matrixToMCPWrites[index][0]) {
       case MCP_0:
         mcpWrite0.digitalWrite(matrixToMCPWrites[index][1], true);
-        delay(10);
+        delay(20);
         mcpWrite0.digitalWrite(matrixToMCPWrites[index][1], false);
         break;
       case MCP_1:
         mcpWrite1.digitalWrite(matrixToMCPWrites[index][1], true);
-        delay(10);
+        delay(20);
         mcpWrite1.digitalWrite(matrixToMCPWrites[index][1], false);
         break;
     }

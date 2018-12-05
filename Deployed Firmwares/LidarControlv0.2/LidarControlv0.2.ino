@@ -4,7 +4,8 @@
 #include <OSCMessage.h>
 #include <OSCBundle.h>
 #include <OSCBoards.h>        //includes necessaris per el modul d'ethernet i OSC
-#include <Wire.h>
+//#include <Wire.h>
+#include <i2c_t3.h>
 #include <LIDARLite.h>
 
 #include <RTPSmooth.h>
@@ -35,20 +36,16 @@ void setup() {
   Udp.begin(inPort);        //arranquem el port on escoltarem en Udp
   lidar.begin(4, true);
   Serial.println("ENDING SETUP");
+  Wire.onError(actOnBusError);
 }
 
 void loop() {
- /* if(Wire.status() == I2C_TIMEOUT) 
-    Wire.resetBus();
-  */
-  if (millis() > 300000) SCB_AIRCR = 0x05FA0004;   //Reinicia passats 5 minuts, no es elegant però pot evitar penjades inesperades penjantlo abans
-  //OSCMsgReceive();    //esperem a rebre missatges OSC
-  //if (enableSendOSC) {
+  if (millis() > TIME_TO_RESET) SCB_AIRCR = 0x05FA0004;
+  OSCMsgReceive();    //esperem a rebre missatges OSC
   int smoothedReading = smoothie.smooth(lidar.distance());
   lidarRange.getCurrentStep(smoothedReading);
   lidarRange.stepChanged(actOnRangeCallback);
   delay(10);
-  //}
 }
 
 void OSCMsgReceive() {
@@ -60,14 +57,35 @@ void OSCMsgReceive() {
     while (size--) {
       bundleIN.fill(Udp.read()); //plenem el bundle amb el que llegim al port Udp
     }
-    bundleIN.route("/activateSendOSC", actOnActivateSendOSC);
+    // bundleIN.route("/activateSendOSC", actOnActivateSendOSC);
+    bundleIN.route("/reset", actOnResetMessage);
   }
 }
 
-void actOnActivateSendOSC(OSCMessage &msg, int addrOffset) {
+void actOnBusError(void) {
+  Serial.print("FAIL - ");
+  switch (Wire.status()) {
+    case I2C_TIMEOUT:  Serial.print("I2C timeout\n"); Wire.resetBus(); break;
+    case I2C_ADDR_NAK: Serial.print("Slave addr not acknowledged\n"); break;
+    case I2C_DATA_NAK: Serial.print("Slave data not acknowledged\n"); break;
+    case I2C_ARB_LOST: Serial.print("Arbitration Lost, possible pullup problem\n"); Wire.resetBus(); break;
+    case I2C_BUF_OVF:  Serial.print("I2C buffer overflow\n"); break;
+    case I2C_NOT_ACQ:  Serial.print("Cannot acquire bus, possible stuck SDA/SCL\n"); Wire.resetBus(); break;
+    case I2C_DMA_ERR:  Serial.print("DMA Error\n"); break;
+    default:           break;
+  }
+}
+/*
+  void actOnActivateSendOSC(OSCMessage & msg, int addrOffset) {
   Serial.println("Activate Send OSC Message Received!");
   enableSendOSC = msg.getInt(0) == 1;
+  }
+*/
+void actOnResetMessage(OSCMessage &msg, int addrOffset) {
+  Serial.println("Reset Message Received!");
+  SCB_AIRCR = 0x05FA0004;
 }
+
 
 void actOnRangeCallback(int id, String callbackString, int currentStep, int currentZone) {
   Serial.print("-ID: ");

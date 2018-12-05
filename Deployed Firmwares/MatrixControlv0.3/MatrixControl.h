@@ -1,4 +1,5 @@
-#include <Wire.h>
+//#include <Wire.h>
+#include <i2c_t3.h>
 #include "Adafruit_MCP23017.h"
 #include "PinsAndConstants.h"
 

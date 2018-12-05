@@ -5,7 +5,7 @@
 #include <OSCBundle.h>
 #include <OSCBoards.h>        //includes necessaris per el modul d'ethernet i OSC
 
-#include "MatrixControl.h"   // la declaració i implementació de la classe MatrixControl. (DEBUG no l'empra)
+#include "MatrixControl.h"   // la declaració i implementació de la classe MatrixControl
 #include "EthernetResetInitSeq.h"
 
 EthernetUDP Udp;                //objecte per a connexió udp
@@ -17,6 +17,8 @@ byte mac[] = { 0x04, 0xE9, 0xE5, 0x03, 0x94, 0x4E }; //mac, patillera
 
 bool matrixInputState[N_MATRIX_ELEMENTS + 1];
 
+bool enableSendOSC = false;
+
 void setup() {
   Serial.begin(115200);     //velocitat de comunicació amb el port serie
   Serial.println("Start setup");
@@ -25,15 +27,58 @@ void setup() {
   Udp.begin(inPort);        //arranquem el port on escoltarem en Udp
   matrixInit(matrixInputState);
   Serial.println("Finish setup!");
+  Wire.onError(actOnBusError);
 }
 
 void loop() {
+  if (millis() > TIME_TO_RESET) SCB_AIRCR = 0x05FA0004;
+  OSCMsgReceive();    //esperem a rebre missatges OSC
   getMatrix(matrixInputState);
   setMatrix(matrixInputState);
   randomBlinkMatrix(matrixInputState);
   detectChangeCallback(actOnGPIOReadChanges); //detecta quan hi ha un canvi en el GPIO d'entrada i crida
-  //a la funció que hi ha com a argument (callback)
+  delay(20);
 }
+
+void OSCMsgReceive() {
+  OSCBundle bundleIN;       //paquet generic de missatges OSC, pot contenir whatever
+  int size = Udp.parsePacket(); //mirem si hi ha dades als paquets, si rebem algo
+  if (size > 0) {   //si rebem algo...
+    //Serial.print("Message Received with size: ");
+    //Serial.println(size);
+    while (size--) {
+      bundleIN.fill(Udp.read()); //plenem el bundle amb el que llegim al port Udp
+    }
+    //bundleIN.route("/activateSendOSC", actOnActivateSendOS);
+    bundleIN.route("/reset", actOnResetMessage);
+  }
+}
+
+void actOnBusError(void) {
+  Serial.print("FAIL - ");
+  switch (Wire.status()) {
+    case I2C_TIMEOUT:  Serial.print("I2C timeout\n"); Wire.resetBus(); break;
+    case I2C_ADDR_NAK: Serial.print("Slave addr not acknowledged\n"); break;
+    case I2C_DATA_NAK: Serial.print("Slave data not acknowledged\n"); break;
+    case I2C_ARB_LOST: Serial.print("Arbitration Lost, possible pullup problem\n"); Wire.resetBus(); break;
+    case I2C_BUF_OVF:  Serial.print("I2C buffer overflow\n"); break;
+    case I2C_NOT_ACQ:  Serial.print("Cannot acquire bus, possible stuck SDA/SCL\n"); Wire.resetBus(); break;
+    case I2C_DMA_ERR:  Serial.print("DMA Error\n"); break;
+    default:           break;
+  }
+}
+
+/*
+  void actOnActivateSendOSC(OSCMessage &msg, int addrOffset) {
+  Serial.println("Activate Send OSC Message Received!");
+  enableSendOSC = msg.getInt(0) == 1;
+  }*/
+
+void actOnResetMessage(OSCMessage &msg, int addrOffset) {
+  Serial.println("Reset Message Received!");
+  SCB_AIRCR = 0x05FA0004;
+}
+
 
 void actOnGPIOReadChanges(String callbackString) {
   if (callbackString == "CHANGED") {
