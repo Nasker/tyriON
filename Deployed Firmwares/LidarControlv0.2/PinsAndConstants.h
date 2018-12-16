@@ -2,3 +2,5 @@
 #define ETHERNET_CS_PIN 10
 
 #define TIME_TO_RESET 300000
+
+#define HARD_RESET_PIN 17

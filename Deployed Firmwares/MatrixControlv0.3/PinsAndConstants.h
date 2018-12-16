@@ -14,3 +14,6 @@
 #define mcpWrite1Adress 3
 
 #define TIME_TO_RESET 300000
+#define I2C_FREQ 50000
+
+#define HARD_RESET_PIN 17
