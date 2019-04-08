@@ -9,6 +9,7 @@
 #include <RTPRelay.h>
 #include <RTPButton.h>
 #include <RTPPeriodicBang.h>
+#include <RTPTeensyWatchDog.h>
 
 #include "EthernetResetInitSeq.h"
 #include "PinsAndConstants.h"
@@ -42,6 +43,8 @@ RTPRelay hazerRelay(HAZER_RELAY_PIN, true);
 
 RTPButton plugSensor(0, PLUG_SENSOR_PIN, NORMAL);
 
+RTPTeensyWatchDog watchdog;
+
 //RTPPeriodicBang hazerTimer(HAZER_PERIOD_MILLIS);
 //unsigned long int hazerCounter = 0;
 unsigned long int smokeMillisEnd = 0;
@@ -55,9 +58,11 @@ void setup() {
     photoDiodesArray[i].setThreshold(defaultThresholds[i]);
   for (int i = 0; i < N_LIGHT_RELAYS; i++)
     relaysArray[i].setState(false);
+  watchdog.init();
 }
 
 void loop() {
+  watchdog.kick();
   OSCMsgReceive();    //esperem a rebre missatges OSC
   for (int i = 0; i < N_INPUTS; i++) {
     photoDiodesArray[i].readnShoot(actOnPhotoDiodeCallbacks);

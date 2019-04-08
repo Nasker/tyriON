@@ -5,6 +5,8 @@
 #include <OSCBundle.h>
 #include <OSCBoards.h>        //includes necessaris per el modul d'ethernet i OSC
 
+#include <RTPTeensyWatchDog.h>
+
 #include "MatrixControl.h"   // la declaració i implementació de la classe MatrixControl
 #include "EthernetResetInitSeq.h"
 
@@ -15,9 +17,9 @@ IPAddress outIp(192, 168, 1, 120); //ip destí i port on enviarem  192, 168, 1, 
 const unsigned int outPort = 3341;
 byte mac[] = { 0x04, 0xE9, 0xE5, 0x03, 0x94, 0x4E }; //mac, patillera
 
-bool matrixInputState[N_MATRIX_ELEMENTS + 1];
+RTPTeensyWatchDog watchdog;
 
-//bool enableSendOSC = false;
+bool matrixInputState[N_MATRIX_ELEMENTS + 1];
 
 void setup() {
   Serial.begin(115200); //velocitat de comunicació amb el port serie
@@ -30,12 +32,12 @@ void setup() {
   Serial.println("Finish setup!");
   Wire.setClock(I2C_FREQ);
   Wire.onError(actOnBusError);
-  initWatchdog();
+  watchdog.init();
 }
 
 void loop() {
   //if (millis() > TIME_TO_RESET) resetTeensy();
-  kickWatchdog();
+  watchdog.kick();
   OSCMsgReceive();    //esperem a rebre missatges OSC
   getMatrix(matrixInputState);
   setMatrix(matrixInputState);
@@ -88,7 +90,6 @@ void resetTeensy() {
   SCB_AIRCR = 0x05FA0004;
 }
 
-
 void actOnGPIOReadChanges(String callbackString) {
   if (callbackString == "CHANGED") {
     Serial.println(callbackString);
@@ -105,33 +106,6 @@ void actOnGPIOReadChanges(String callbackString) {
     Udp.endPacket();              //tanquem el paquet
     msg.empty();
   }
-}
-
-void initWatchdog() {
-  noInterrupts();                                         // don't allow interrupts while setting up WDOG
-  WDOG_UNLOCK = WDOG_UNLOCK_SEQ1;                         // unlock access to WDOG registers
-  WDOG_UNLOCK = WDOG_UNLOCK_SEQ2;
-  delayMicroseconds(1);                                   // Need to wait a bit..
-
-  // for this demo, we will use 1 second WDT timeout (e.g. you must reset it in < 1 sec or a boot occurs)
-  WDOG_TOVALH = 0x006d;
-  WDOG_TOVALL = 0xdd00;
-
-  // This sets prescale clock so that the watchdog timer ticks at 7.2MHz
-  WDOG_PRESC  = 0x400;
-
-  // Set options to enable WDT. You must always do this as a SINGLE write to WDOG_CTRLH
-  WDOG_STCTRLH |= WDOG_STCTRLH_ALLOWUPDATE |
-                  WDOG_STCTRLH_WDOGEN | WDOG_STCTRLH_WAITEN |
-                  WDOG_STCTRLH_STOPEN | WDOG_STCTRLH_CLKSRC;
-  interrupts();
-}
-
-void kickWatchdog() {
-  noInterrupts();
-  WDOG_REFRESH = 0xA602;
-  WDOG_REFRESH = 0xB480;
-  interrupts();
 }
 
 void hardVccReset() {

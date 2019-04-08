@@ -11,6 +11,7 @@
 #include <RTPSmooth.h>
 #include <RTPButton.h>
 #include <RTPSmartRange.h>
+#include <RTPTeensyWatchDog.h>
 
 #include "EthernetResetInitSeq.h"
 #include "PinsAndConstants.h"
@@ -25,6 +26,7 @@ byte mac[] = { 0x04, 0xE9, 0xE5, 0x03, 0x94, 0x5E }; //mac, patillera
 LIDARLite lidar;
 RTPSmooth smoothie;
 RTPSmartRange lidarRange(0, 1, 500, 0, 500);
+RTPTeensyWatchDog watchdog;
 
 bool enableSendOSC = false;
 
@@ -35,7 +37,8 @@ void setup() {
   EthernetResetInitSeq();   //funció (definidad més abaix) de secuencia necesaria per inicialitzar modul ethernet!!
   Ethernet.begin(mac, selfIp);  //arranquem el modul d'ethernet
   Udp.begin(inPort);        //arranquem el port on escoltarem en Udp
-  initWatchdog();
+  //initWatchdog();
+  watchdog.init();
   lidar.begin(4, true);
   Wire.onError(actOnBusError);
   Serial.println("ENDING SETUP");
@@ -43,7 +46,8 @@ void setup() {
 
 void loop() {
   //if (millis() > TIME_TO_RESET) resetTeensy();
-  kickWatchdog();
+  //kickWatchdog();
+  watchdog.kick();
   OSCMsgReceive();    //esperem a rebre missatges OSC
   int smoothedReading = smoothie.smooth(lidar.distance());
   lidarRange.getCurrentStep(smoothedReading);
@@ -129,7 +133,7 @@ void initWatchdog() {
   delayMicroseconds(1);                                   // Need to wait a bit..
 
   // for this demo, we will use 2 second WDT timeout (e.g. you must reset it in < 1 sec or a boot occurs)
-  WDOG_TOVALH = 0x00db; 
+  WDOG_TOVALH = 0x00db;
   WDOG_TOVALL = 0xba00;
 
   // This sets prescale clock so that the watchdog timer ticks at 7.2MHz

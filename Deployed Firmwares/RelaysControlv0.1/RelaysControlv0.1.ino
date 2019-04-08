@@ -6,6 +6,8 @@
 #include <OSCBoards.h>        //includes necessaris per el modul d'ethernet i OSC
 
 #include <RTPRelay.h>
+//#include <RTPTeensyWatchDog.h>
+
 #include "EthernetResetInitSeq.h"
 #include "PinsAndConstants.h"
 
@@ -23,16 +25,20 @@ RTPRelay relaysArray[N_RELAYS] = {
 
 RTPRelay switchingLights(SWITCHING_LIGHTS_PIN, true);
 
+//RTPTeensyWatchDog watchdog;
+
 void setup() {
   Serial.begin(115200);     //velocitat de comunicació amb el port serie
   Serial.println("START SETUP");
   EthernetResetInitSeq();   //funció (definidad més abaix) de secuencia necesaria per inicialitzar modul ethernet!!
   Ethernet.begin(mac, selfIp);  //arranquem el modul d'ethernet
   Udp.begin(inPort);        //arranquem el port on escoltarem en Udp
+  //watchdog.init();
   Serial.println("FINISH SETUP");
 }
 
 void loop() {
+  //watchdog.kick();
   OSCMsgReceive();    //esperem a rebre missatges OSC
   //Serial.println("LOOP");
 }
