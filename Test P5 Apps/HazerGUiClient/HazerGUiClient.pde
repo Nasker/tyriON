@@ -84,7 +84,7 @@ void controlEvent(ControlEvent theEvent) {
       print(int(theEvent.getGroup().getArrayValue()[i]));
     }
     println("\t "+theEvent.getValue());
-    if (theEvent.getValue() >= 0) sendOSCMessage("/haze/intens", int(theEvent.getValue()));
+    if (theEvent.getValue() >= 0) sendOSCMessage("/haze/intensity", int(theEvent.getValue()));
   }
   if (theEvent.isFrom(r2)) {
     print("got an event from "+theEvent.getName()+"\t");
