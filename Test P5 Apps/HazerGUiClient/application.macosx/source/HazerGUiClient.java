@@ -1,14 +1,34 @@
-import oscP5.*;
-import netP5.*;
-import controlP5.*;
+import processing.core.*; 
+import processing.data.*; 
+import processing.event.*; 
+import processing.opengl.*; 
+
+import oscP5.*; 
+import netP5.*; 
+import controlP5.*; 
+
+import java.util.HashMap; 
+import java.util.ArrayList; 
+import java.io.File; 
+import java.io.BufferedReader; 
+import java.io.PrintWriter; 
+import java.io.InputStream; 
+import java.io.OutputStream; 
+import java.io.IOException; 
+
+public class HazerGUiClient extends PApplet {
+
+
+
+
 
 ControlP5 cp5;
 OscP5 oscP5;
 NetAddress myRemoteLocation;
 RadioButton r1, r2;
 
-void setup() {
-  size(700, 200);
+public void setup() {
+  
   frameRate(25);
   oscP5 = new OscP5(this, 12345);
   myRemoteLocation = new NetAddress("192.168.1.83", 3383);
@@ -17,7 +37,7 @@ void setup() {
   r1 = cp5.addRadioButton("Fan_Speed")
     .setCaptionLabel("Fan Speed")
     .showLabels()
-    .setPosition(width*.1, height*.25)
+    .setPosition(width*.1f, height*.25f)
     .setSize(60, 20)
     .setColorForeground(color(120))
     .setColorActive(color(255))
@@ -43,7 +63,7 @@ void setup() {
   r2 = cp5.addRadioButton("Hazer_Intens")
     .setCaptionLabel("Hazer Intens") 
     .showLabels()
-    .setPosition(width*.1, height*.65)
+    .setPosition(width*.1f, height*.65f)
     .setSize(60, 20)
     .setColorForeground(color(120))
     .setColorActive(color(255))
@@ -65,11 +85,11 @@ void setup() {
   }
 }
 
-void draw() {
+public void draw() {
   background(0);
 }
 
-void sendOSCMessage(String address, int value) {
+public void sendOSCMessage(String address, int value) {
   OscMessage myMessage = new OscMessage(address);
   myMessage.add(value);
   oscP5.send(myMessage, myRemoteLocation);
@@ -77,29 +97,39 @@ void sendOSCMessage(String address, int value) {
   println(myMessage);
 }
 
-void controlEvent(ControlEvent theEvent) {
+public void controlEvent(ControlEvent theEvent) {
   if (theEvent.isFrom(r1)) {
     print("got an event from "+theEvent.getName()+"\t");
     for (int i=0; i<theEvent.getGroup().getArrayValue().length; i++) {
-      print(int(theEvent.getGroup().getArrayValue()[i]));
+      print(PApplet.parseInt(theEvent.getGroup().getArrayValue()[i]));
     }
     println("\t "+theEvent.getValue());
-    if (theEvent.getValue() >= 0) sendOSCMessage("/haze/intensity", int(theEvent.getValue()));
+    if (theEvent.getValue() >= 0) sendOSCMessage("/haze/intensity", PApplet.parseInt(theEvent.getValue()));
   }
   if (theEvent.isFrom(r2)) {
     print("got an event from "+theEvent.getName()+"\t");
     for (int i=0; i<theEvent.getGroup().getArrayValue().length; i++) {
-      print(int(theEvent.getGroup().getArrayValue()[i]));
+      print(PApplet.parseInt(theEvent.getGroup().getArrayValue()[i]));
     }
     println("\t "+theEvent.getValue());
-    if (theEvent.getValue() >= 0) sendOSCMessage("/haze/speed", int(theEvent.getValue()));
+    if (theEvent.getValue() >= 0) sendOSCMessage("/haze/speed", PApplet.parseInt(theEvent.getValue()));
   }
 }
 
 /* incoming osc message are forwarded to the oscEvent method. */
-void oscEvent(OscMessage theOscMessage) {
+public void oscEvent(OscMessage theOscMessage) {
   /* print the address pattern and the typetag of the received OscMessage */
   print("### received an osc message.");
   print(" addrpattern: "+theOscMessage.addrPattern());
   println(" typetag: "+theOscMessage.typetag());
+}
+  public void settings() {  size(700, 200); }
+  static public void main(String[] passedArgs) {
+    String[] appletArgs = new String[] { "HazerGUiClient" };
+    if (passedArgs != null) {
+      PApplet.main(concat(appletArgs, passedArgs));
+    } else {
+      PApplet.main(appletArgs);
+    }
+  }
 }

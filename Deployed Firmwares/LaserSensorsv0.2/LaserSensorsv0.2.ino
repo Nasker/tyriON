@@ -30,12 +30,12 @@ RTPPhotoDiodeTrigger photoDiodesArray[N_INPUTS] = {
 };
 
 int defaultThresholds[] = { PHOTODIODE_TRESHOLD_DEFAULT_1ST, PHOTODIODE_TRESHOLD_DEFAULT_2ND
-                           //, PHOTODIODE_TRESHOLD_DEFAULT_3RD, PHOTODIODE_TRESHOLD_DEFAULT_4TH
+                            //, PHOTODIODE_TRESHOLD_DEFAULT_3RD, PHOTODIODE_TRESHOLD_DEFAULT_4TH
                           };
 
 RTPRelay relaysArray[N_LIGHT_RELAYS] = {
   RTPRelay(LIGHT_RELAY_PIN_1ST), RTPRelay(LIGHT_RELAY_PIN_2ND),
-  RTPRelay(LIGHT_RELAY_PIN_3RD), RTPRelay(LIGHT_RELAY_PIN_4TH),
+  //RTPRelay(LIGHT_RELAY_PIN_3RD), RTPRelay(LIGHT_RELAY_PIN_4TH),
 };
 
 RTPRelay laserRelay(LASER_RELAY_PIN, true);
@@ -78,7 +78,7 @@ void OSCMsgReceive() {
   OSCBundle bundleIN;       //paquet generic de missatges OSC, pot contenir whatever
   int size = Udp.parsePacket(); //mirem si hi ha dades als paquets, si rebem algo
   if (size > 0) {   //si rebem algo...
-    //Serial.print("Message Received with size: ");
+    Serial.print("Message Received with size: ");
     //Serial.println(size);
     while (size--) {
       bundleIN.fill(Udp.read()); //plenem el bundle amb el que llegim al port Udp
@@ -92,18 +92,18 @@ void OSCMsgReceive() {
   }
 }
 /*
-void actOnRemoteSmokeBang(OSCMessage &msg, int addrOffset) {
+  void actOnRemoteSmokeBang(OSCMessage &msg, int addrOffset) {
   Serial.println("Smoke Control message received!");
   smokeMillisEnd = millis() + msg.getInt(0);
   hazerRelay.setState(true);
-}*/
+  }*/
 /*
-void controlHazerTimed() {
+  void controlHazerTimed() {
   if (hazerRelay.getState() && millis() >= smokeMillisEnd) {
     hazerRelay.setState(false);
     smokeMillisEnd = 0;
   }
-}
+  }
 */
 void actOnResetMessage(OSCMessage & msg, int addrOffset) {
   Serial.println("Reset message received!");
@@ -117,8 +117,9 @@ void actOnPhotodiodeThresholdSet(OSCMessage & msg, int addrOffset) {
 }
 
 void actOnLightsRemoteSetting(OSCMessage & msg, int addrOffset) {
-  Serial.println("Lights remote setting message received!");
+  Serial.print("Lights remote setting message received with ID: ");
   int relayID = msg.getInt(0);
+  Serial.print(relayID);
   boolean relayState = msg.getInt(1) == 1;
   switch (relayID) {
     case ALL_LIGHTS:

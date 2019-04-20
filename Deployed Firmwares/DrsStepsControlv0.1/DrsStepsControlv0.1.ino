@@ -8,7 +8,7 @@
 #include <RTPButton.h>
 #include <RTPRelay.h>
 //#include <RTPTeensyWatchDog.h>
-#include <Adafruit_SleepyDog.h>
+//#include <Adafruit_SleepyDog.h>
 
 #include "EthernetResetInitSeq.h"
 #include "PinsAndConstants.h"
@@ -39,11 +39,11 @@ void setup() {
   Ethernet.begin(mac, selfIp);  //arranquem el modul d'ethernet
   Udp.begin(inPort);        //arranquem el port on escoltarem en Udp
   //watchdog.init();
-  Watchdog.enable(2000);
+  //Watchdog.enable(2000);
 }
 
 void loop() {
-  Watchdog.reset();
+  //Watchdog.reset();
   OSCMsgReceive();    //esperem a rebre missatges OSC
   for (int i = 0; i < N_INPUTS; i++)
     inputsArray[i].callback(actOnStepsCallbacks);
@@ -67,7 +67,7 @@ void actOnOpenRelay(OSCMessage &msg, int addrOffset) {
   int relayID = msg.getInt(0);    //desempaquetem els Integers que ens venen
   Serial.print("Opening relay #");
   Serial.println(relayID);
-  Watchdog.disable();
+  //Watchdog.disable();
   if (relayID == TUBE_HOLDER_RELAY_ID) {
     relaysArray[TUBE_HOLDER_RELAY_ID].setState(true);
     for (int i = 0; i < 60; i++) {
@@ -77,7 +77,7 @@ void actOnOpenRelay(OSCMessage &msg, int addrOffset) {
     relaysArray[LIGHT_RELAY_ID].setState(false);
     relaysArray[TUBE_HOLDER_RELAY_ID].setState(false);
   }
-  Watchdog.enable(2000);
+  //Watchdog.enable(2000);
 }
 
 void actOnCloseRelay(OSCMessage &msg, int addrOffset) {
